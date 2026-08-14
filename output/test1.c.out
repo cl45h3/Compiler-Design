@@ -1,0 +1,98 @@
+=================================================================
+                    LEXICAL ANALYSIS TABLE
+=================================================================
+NO ERRORS FOUND
+-----------------------------------------------------------------
+
+VALID TOKENS:
+LEXEME               TOKEN
+-----------------------------------------------------------------
+#include             PP_INCLUDE
+<stdio.h>            HEADER_NAME
+int                  KEYWORD
+add                  IDENTIFIER
+(                    LEFT_PAREN
+int                  KEYWORD
+a                    IDENTIFIER
+,                    COMMA
+int                  KEYWORD
+b                    IDENTIFIER
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+return               KEYWORD
+a                    IDENTIFIER
++                    OPERATOR
+b                    IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+int                  KEYWORD
+x                    IDENTIFIER
+,                    COMMA
+counter_1            IDENTIFIER
+;                    SEMICOLON
+float                KEYWORD
+total                IDENTIFIER
+;                    SEMICOLON
+double               KEYWORD
+avg                  IDENTIFIER
+;                    SEMICOLON
+char                 KEYWORD
+grade                IDENTIFIER
+;                    SEMICOLON
+const                KEYWORD
+int                  KEYWORD
+LIMIT                IDENTIFIER
+=                    OPERATOR
+10                   INTEGER_LITERAL
+;                    SEMICOLON
+static               KEYWORD
+long                 KEYWORD
+count                IDENTIFIER
+=                    OPERATOR
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+if                   KEYWORD
+(                    LEFT_PAREN
+x                    IDENTIFIER
+>                    OPERATOR
+0                    INTEGER_LITERAL
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+x                    IDENTIFIER
+=                    OPERATOR
+x                    IDENTIFIER
++                    OPERATOR
+1                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+else                 KEYWORD
+{                    LEFT_BRACE
+x                    IDENTIFIER
+=                    OPERATOR
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+while                KEYWORD
+(                    LEFT_PAREN
+x                    IDENTIFIER
+<                    OPERATOR
+LIMIT                IDENTIFIER
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+x                    IDENTIFIER
+++                   OPERATOR
+;                    SEMICOLON
+}                    RIGHT_BRACE
+return               KEYWORD
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 85
+Total errors found: 0
+Total lines processed: 27

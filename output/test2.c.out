@@ -1,0 +1,79 @@
+=================================================================
+                    LEXICAL ANALYSIS TABLE
+=================================================================
+ERRORS FOUND:
+-----------------------------------------------------------------
+ERROR: Invalid exponent at line 13, column 16
+-----------------------------------------------------------------
+
+VALID TOKENS:
+LEXEME               TOKEN
+-----------------------------------------------------------------
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+int                  KEYWORD
+a                    IDENTIFIER
+=                    OPERATOR
+42                   INTEGER_LITERAL
+;                    SEMICOLON
+int                  KEYWORD
+b                    IDENTIFIER
+=                    OPERATOR
+007                  OCTAL_LITERAL
+;                    SEMICOLON
+int                  KEYWORD
+c                    IDENTIFIER
+=                    OPERATOR
+0x1F3A               HEXADECIMAL_LITERAL
+;                    SEMICOLON
+unsigned             KEYWORD
+long                 KEYWORD
+d                    IDENTIFIER
+=                    OPERATOR
+100UL                INTEGER_LITERAL
+;                    SEMICOLON
+long long            KEYWORD
+e                    IDENTIFIER
+=                    OPERATOR
+123456789LL          INTEGER_LITERAL
+;                    SEMICOLON
+float                KEYWORD
+f                    IDENTIFIER
+=                    OPERATOR
+3.14f                FLOAT_LITERAL
+;                    SEMICOLON
+double               KEYWORD
+g                    IDENTIFIER
+=                    OPERATOR
+2.71828              FLOAT_LITERAL
+;                    SEMICOLON
+double               KEYWORD
+h                    IDENTIFIER
+=                    OPERATOR
+.5                   FLOAT_LITERAL
+;                    SEMICOLON
+double               KEYWORD
+i                    IDENTIFIER
+=                    OPERATOR
+5.                   FLOAT_LITERAL
+;                    SEMICOLON
+double               KEYWORD
+j                    IDENTIFIER
+=                    OPERATOR
+6.022e23             EXPONENT_NUMBER_LITERAL
+;                    SEMICOLON
+double               KEYWORD
+k                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+return               KEYWORD
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 64
+Total errors found: 1
+Total lines processed: 17
