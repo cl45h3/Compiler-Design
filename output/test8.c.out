@@ -1,0 +1,202 @@
+=================================================================
+                    LEXICAL ANALYSIS TABLE
+=================================================================
+NO ERRORS FOUND
+-----------------------------------------------------------------
+
+VALID TOKENS:
+LEXEME               TOKEN
+-----------------------------------------------------------------
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+int                  KEYWORD
+sum                  IDENTIFIER
+=                    OPERATOR
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+for                  KEYWORD
+(                    LEFT_PAREN
+int                  KEYWORD
+i                    IDENTIFIER
+=                    OPERATOR
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+i                    IDENTIFIER
+<                    OPERATOR
+10                   INTEGER_LITERAL
+;                    SEMICOLON
+i                    IDENTIFIER
+++                   OPERATOR
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+sum                  IDENTIFIER
+=                    OPERATOR
+sum                  IDENTIFIER
++                    OPERATOR
+i                    IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+int                  KEYWORD
+n                    IDENTIFIER
+=                    OPERATOR
+5                    INTEGER_LITERAL
+;                    SEMICOLON
+do                   KEYWORD
+{                    LEFT_BRACE
+n                    IDENTIFIER
+--                   OPERATOR
+;                    SEMICOLON
+}                    RIGHT_BRACE
+while                KEYWORD
+(                    LEFT_PAREN
+n                    IDENTIFIER
+>                    OPERATOR
+0                    INTEGER_LITERAL
+)                    RIGHT_PAREN
+;                    SEMICOLON
+int                  KEYWORD
+grade                IDENTIFIER
+=                    OPERATOR
+2                    INTEGER_LITERAL
+;                    SEMICOLON
+switch               KEYWORD
+(                    LEFT_PAREN
+grade                IDENTIFIER
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+case                 KEYWORD
+1                    INTEGER_LITERAL
+:                    COLON
+sum                  IDENTIFIER
+=                    OPERATOR
+sum                  IDENTIFIER
++                    OPERATOR
+100                  INTEGER_LITERAL
+;                    SEMICOLON
+break                KEYWORD
+;                    SEMICOLON
+case                 KEYWORD
+2                    INTEGER_LITERAL
+:                    COLON
+sum                  IDENTIFIER
+=                    OPERATOR
+sum                  IDENTIFIER
++                    OPERATOR
+50                   INTEGER_LITERAL
+;                    SEMICOLON
+break                KEYWORD
+;                    SEMICOLON
+default              KEYWORD
+:                    COLON
+sum                  IDENTIFIER
+=                    OPERATOR
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+break                KEYWORD
+;                    SEMICOLON
+}                    RIGHT_BRACE
+int                  KEYWORD
+numbers              IDENTIFIER
+[                    LEFT_BRACKET
+5                    INTEGER_LITERAL
+]                    RIGHT_BRACKET
+=                    OPERATOR
+{                    LEFT_BRACE
+1                    INTEGER_LITERAL
+,                    COMMA
+2                    INTEGER_LITERAL
+,                    COMMA
+3                    INTEGER_LITERAL
+,                    COMMA
+4                    INTEGER_LITERAL
+,                    COMMA
+5                    INTEGER_LITERAL
+}                    RIGHT_BRACE
+;                    SEMICOLON
+char                 KEYWORD
+name                 IDENTIFIER
+[                    LEFT_BRACKET
+20                   INTEGER_LITERAL
+]                    RIGHT_BRACKET
+=                    OPERATOR
+"hello"              STRING_LITERAL
+;                    SEMICOLON
+char                 KEYWORD
+grades               IDENTIFIER
+[                    LEFT_BRACKET
+3                    INTEGER_LITERAL
+]                    RIGHT_BRACKET
+=                    OPERATOR
+{                    LEFT_BRACE
+'A'                  CHAR_LITERAL
+,                    COMMA
+'B'                  CHAR_LITERAL
+,                    COMMA
+'C'                  CHAR_LITERAL
+}                    RIGHT_BRACE
+;                    SEMICOLON
+int                  KEYWORD
+matrix               IDENTIFIER
+[                    LEFT_BRACKET
+3                    INTEGER_LITERAL
+]                    RIGHT_BRACKET
+[                    LEFT_BRACKET
+3                    INTEGER_LITERAL
+]                    RIGHT_BRACKET
+;                    SEMICOLON
+matrix               IDENTIFIER
+[                    LEFT_BRACKET
+0                    INTEGER_LITERAL
+]                    RIGHT_BRACKET
+[                    LEFT_BRACKET
+0                    INTEGER_LITERAL
+]                    RIGHT_BRACKET
+=                    OPERATOR
+1                    INTEGER_LITERAL
+;                    SEMICOLON
+return               KEYWORD
+sum                  IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 154
+Total errors found: 0
+Total lines processed: 40
+
+=================================================================
+                        SYMBOL TABLE
+=================================================================
+IDENTIFIER           OCCURRENCES
+-----------------------------------------------------------------
+grade                2
+grades               1
+i                    4
+main                 1
+matrix               2
+n                    3
+name                 1
+numbers              1
+sum                  9
+-----------------------------------------------------------------
+Total unique identifiers: 9
+
+=================================================================
+                        KEYWORD TABLE
+=================================================================
+KEYWORD              OCCURRENCES
+-----------------------------------------------------------------
+break                3
+case                 2
+char                 2
+default              1
+do                   1
+for                  1
+int                  7
+return               1
+switch               1
+while                1
+-----------------------------------------------------------------
+Total unique keywords: 10

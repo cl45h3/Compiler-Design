@@ -1,0 +1,131 @@
+=================================================================
+                    LEXICAL ANALYSIS TABLE
+=================================================================
+ERRORS FOUND:
+-----------------------------------------------------------------
+ERROR: Malformed include directive at line 1, column 10
+ERROR: Missing exponent digits at line 4, column 15
+ERROR: Incomplete exponent at line 5, column 15
+ERROR: Invalid exponent at line 6, column 15
+ERROR: Invalid exponent at line 7, column 15
+ERROR: Invalid exponent at line 8, column 15
+ERROR: Invalid hex literal at line 10, column 13
+ERROR: Invalid identifier at line 11, column 13
+ERROR: Invalid octal literal at line 12, column 13
+ERROR: Invalid identifier at line 14, column 9
+ERROR: Unterminated character at line 16, column 14
+ERROR: Unterminated string at line 17, column 15
+ERROR: Unrecognized character at line 19, column 13
+ERROR: Unrecognized character at line 20, column 13
+ERROR: Unrecognized character at line 20, column 17
+ERROR: Unterminated comment at line 25, column 1
+-----------------------------------------------------------------
+
+VALID TOKENS:
+LEXEME               TOKEN
+-----------------------------------------------------------------
+#include             PP_INCLUDE
+nvalid_header        IDENTIFIER
+.                    DOT
+h                    IDENTIFIER
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+float                KEYWORD
+a                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+float                KEYWORD
+b                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+float                KEYWORD
+c                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+float                KEYWORD
+d                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+float                KEYWORD
+e                    IDENTIFIER
+=                    OPERATOR
+bc                   IDENTIFIER
+;                    SEMICOLON
+int                  KEYWORD
+f                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+g                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+h                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+;                    SEMICOLON
+char                 KEYWORD
+i                    IDENTIFIER
+=                    OPERATOR
+char                 KEYWORD
+*                    OPERATOR
+j                    IDENTIFIER
+=                    OPERATOR
+int                  KEYWORD
+k                    IDENTIFIER
+=                    OPERATOR
+10                   INTEGER_LITERAL
+;                    SEMICOLON
+int                  KEYWORD
+l                    IDENTIFIER
+=                    OPERATOR
+foo                  IDENTIFIER
+;                    SEMICOLON
+return               KEYWORD
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 65
+Total errors found: 16
+Total lines processed: 26
+
+=================================================================
+                        SYMBOL TABLE
+=================================================================
+IDENTIFIER           OCCURRENCES
+-----------------------------------------------------------------
+a                    1
+b                    1
+bc                   1
+c                    1
+d                    1
+e                    1
+f                    1
+foo                  1
+g                    1
+h                    2
+i                    1
+j                    1
+k                    1
+l                    1
+main                 1
+nvalid_header        1
+-----------------------------------------------------------------
+Total unique identifiers: 16
+
+=================================================================
+                        KEYWORD TABLE
+=================================================================
+KEYWORD              OCCURRENCES
+-----------------------------------------------------------------
+char                 2
+float                5
+int                  7
+return               1
+-----------------------------------------------------------------
+Total unique keywords: 4

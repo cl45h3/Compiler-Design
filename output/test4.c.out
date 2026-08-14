@@ -1,0 +1,82 @@
+=================================================================
+                    LEXICAL ANALYSIS TABLE
+=================================================================
+NO ERRORS FOUND
+-----------------------------------------------------------------
+
+VALID TOKENS:
+LEXEME               TOKEN
+-----------------------------------------------------------------
+#include             PP_INCLUDE
+<stdio.h>            HEADER_NAME
+#include             PP_INCLUDE
+"myheader.h"         HEADER_NAME
+#define              PP_DEFINE
+MAX_SIZE             IDENTIFIER
+100                  INTEGER_LITERAL
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+char                 KEYWORD
+*                    OPERATOR
+msg                  IDENTIFIER
+=                    OPERATOR
+"Hello, world!\n"    STRING_LITERAL
+;                    SEMICOLON
+char                 KEYWORD
+newline              IDENTIFIER
+=                    OPERATOR
+'\n'                 CHAR_LITERAL
+;                    SEMICOLON
+char                 KEYWORD
+quote                IDENTIFIER
+=                    OPERATOR
+'\''                 CHAR_LITERAL
+;                    SEMICOLON
+char                 KEYWORD
+letter               IDENTIFIER
+=                    OPERATOR
+'A'                  CHAR_LITERAL
+;                    SEMICOLON
+printf               PRINTF_FUNCTION
+(                    LEFT_PAREN
+"%s"                 STRING_LITERAL
+,                    COMMA
+msg                  IDENTIFIER
+)                    RIGHT_PAREN
+;                    SEMICOLON
+return               KEYWORD
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 44
+Total errors found: 0
+Total lines processed: 18
+
+=================================================================
+                        SYMBOL TABLE
+=================================================================
+IDENTIFIER           OCCURRENCES
+-----------------------------------------------------------------
+MAX_SIZE             1
+letter               1
+main                 1
+msg                  2
+newline              1
+quote                1
+-----------------------------------------------------------------
+Total unique identifiers: 6
+
+=================================================================
+                        KEYWORD TABLE
+=================================================================
+KEYWORD              OCCURRENCES
+-----------------------------------------------------------------
+char                 4
+int                  1
+return               1
+-----------------------------------------------------------------
+Total unique keywords: 3

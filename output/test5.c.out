@@ -1,0 +1,99 @@
+=================================================================
+                    LEXICAL ANALYSIS TABLE
+=================================================================
+ERRORS FOUND:
+-----------------------------------------------------------------
+ERROR: Invalid identifier at line 2, column 13
+ERROR: Invalid identifier at line 3, column 13
+ERROR: Invalid octal literal at line 4, column 13
+ERROR: Missing exponent digits at line 5, column 15
+ERROR: Incomplete exponent at line 6, column 15
+ERROR: Invalid exponent at line 7, column 15
+ERROR: Unterminated character at line 8, column 16
+ERROR: Unterminated string at line 9, column 15
+ERROR: Invalid identifier at line 10, column 9
+ERROR: Unrecognized character at line 11, column 9
+-----------------------------------------------------------------
+
+VALID TOKENS:
+LEXEME               TOKEN
+-----------------------------------------------------------------
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+int                  KEYWORD
+a                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+b                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+c                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+float                KEYWORD
+d                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+float                KEYWORD
+e                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+float                KEYWORD
+f                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+char                 KEYWORD
+bad                  IDENTIFIER
+=                    OPERATOR
+char                 KEYWORD
+*                    OPERATOR
+s                    IDENTIFIER
+=                    OPERATOR
+int                  KEYWORD
+;                    SEMICOLON
+int                  KEYWORD
+weird                IDENTIFIER
+;                    SEMICOLON
+return               KEYWORD
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 45
+Total errors found: 10
+Total lines processed: 14
+
+=================================================================
+                        SYMBOL TABLE
+=================================================================
+IDENTIFIER           OCCURRENCES
+-----------------------------------------------------------------
+a                    1
+b                    1
+bad                  1
+c                    1
+d                    1
+e                    1
+f                    1
+main                 1
+s                    1
+weird                1
+-----------------------------------------------------------------
+Total unique identifiers: 10
+
+=================================================================
+                        KEYWORD TABLE
+=================================================================
+KEYWORD              OCCURRENCES
+-----------------------------------------------------------------
+char                 2
+float                3
+int                  6
+return               1
+-----------------------------------------------------------------
+Total unique keywords: 4

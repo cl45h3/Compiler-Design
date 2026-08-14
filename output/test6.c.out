@@ -1,0 +1,75 @@
+=================================================================
+                    LEXICAL ANALYSIS TABLE
+=================================================================
+NO ERRORS FOUND
+-----------------------------------------------------------------
+
+VALID TOKENS:
+LEXEME               TOKEN
+-----------------------------------------------------------------
+#include             PP_INCLUDE
+<stdio.h>            HEADER_NAME
+#include             PP_INCLUDE
+"myheader.h"         HEADER_NAME
+#define              PP_DEFINE
+MAX                  IDENTIFIER
+100                  INTEGER_LITERAL
+#                    HASH
+pragma               IDENTIFIER
+once                 IDENTIFIER
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+int                  KEYWORD
+x                    IDENTIFIER
+=                    OPERATOR
+MAX                  IDENTIFIER
+;                    SEMICOLON
+bool                 KEYWORD
+ok                   IDENTIFIER
+=                    OPERATOR
+true                 BOOLEAN_LITERAL
+;                    SEMICOLON
+char                 KEYWORD
+*                    OPERATOR
+s                    IDENTIFIER
+=                    OPERATOR
+"hi\n"               STRING_LITERAL
+;                    SEMICOLON
+return               KEYWORD
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 35
+Total errors found: 0
+Total lines processed: 15
+
+=================================================================
+                        SYMBOL TABLE
+=================================================================
+IDENTIFIER           OCCURRENCES
+-----------------------------------------------------------------
+MAX                  2
+main                 1
+ok                   1
+once                 1
+pragma               1
+s                    1
+x                    1
+-----------------------------------------------------------------
+Total unique identifiers: 7
+
+=================================================================
+                        KEYWORD TABLE
+=================================================================
+KEYWORD              OCCURRENCES
+-----------------------------------------------------------------
+bool                 1
+char                 1
+int                  2
+return               1
+-----------------------------------------------------------------
+Total unique keywords: 4
