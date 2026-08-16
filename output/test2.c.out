@@ -20,7 +20,7 @@ a                    IDENTIFIER
 int                  KEYWORD
 b                    IDENTIFIER
 =                    OPERATOR
-007                  OCTAL_LITERAL
+007                  INTEGER_LITERAL
 ;                    SEMICOLON
 int                  KEYWORD
 c                    IDENTIFIER

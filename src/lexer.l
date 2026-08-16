@@ -1,6 +1,4 @@
 %{
-
-
 #include <iostream>
 #include <vector>
 #include <map>
@@ -17,12 +15,26 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-
 int currentLineNumber = 1;
 int currentColumn = 1;
+int tokenStartLine = 1;
+int tokenStartColumn = 1;
 
-#define YY_USER_ACTION currentColumn += yyleng;
-
+/* Robust line and column tracking for all tokens including multiline */
+#define YY_USER_ACTION { \
+    tokenStartLine = currentLineNumber; \
+    tokenStartColumn = currentColumn; \
+    for (int i = 0; i < yyleng; i++) { \
+        if (yytext[i] == '\n') { \
+            currentLineNumber++; \
+            currentColumn = 1; \
+        } else if (yytext[i] == '\t') { \
+            currentColumn += 4; \
+        } else { \
+            currentColumn++; \
+        } \
+    } \
+}
 
 struct LexicalToken {
     string lexeme;
@@ -50,10 +62,10 @@ void addToken(const char* type, const char* lexeme) {
 
 void addError(const char* lexeme, const char* category) {
     string errorMsg = "ERROR: " + string(category);
-    errorList.emplace_back(errorMsg, currentLineNumber, currentColumn - (int)strlen(lexeme));
+    errorList.emplace_back(errorMsg, tokenStartLine, tokenStartColumn);
 }
 
-/* symbol table */
+/* Symbol Table */
 struct SymbolEntry {
     string name;
     int occurrences;
@@ -76,7 +88,7 @@ void addKeyword(const char* name) {
     keywordTable[string(name)]++;
 }
 
-/* output */
+/* Output Functions */
 void printAnalysisResults() {
     cout << "=================================================================" << endl;
     cout << "                    LEXICAL ANALYSIS TABLE" << endl;
@@ -135,24 +147,21 @@ void printSymbolTable() {
 %}
 
 %option noyywrap
-%option yylineno
 %option nounput
 
 %x INCL
-%x MULTILINE_COMMENT
 
-/* regex */
-DIGIT           [0-9]
-LETTER          [a-zA-Z_]
-IDENTIFIER      {LETTER}({LETTER}|{DIGIT})*
+/* Regular Expressions */
+DIGIT            [0-9]
+LETTER           [a-zA-Z_]
+IDENTIFIER       {LETTER}({LETTER}|{DIGIT})*
 
+INT_SUFFIX_U     [uU]
+INT_SUFFIX_L     [lL]
+INT_SUFFIX_LL    ([lL][lL])
+INT_SUFFIX       ({INT_SUFFIX_U}?{INT_SUFFIX_L}?)|({INT_SUFFIX_U}?{INT_SUFFIX_LL}?)|({INT_SUFFIX_L}?{INT_SUFFIX_U}?)|({INT_SUFFIX_LL}?{INT_SUFFIX_U}?)
 
-INT_SUFFIX_U    [uU]
-INT_SUFFIX_L    [lL]
-INT_SUFFIX_LL   ([lL][lL])
-INT_SUFFIX      ({INT_SUFFIX_U}?{INT_SUFFIX_L}?)|({INT_SUFFIX_U}?{INT_SUFFIX_LL}?)|({INT_SUFFIX_L}?{INT_SUFFIX_U}?)|({INT_SUFFIX_LL}?{INT_SUFFIX_U}?)
-
-FLOAT_SUFFIX    [fFlL]
+FLOAT_SUFFIX     [fFlL]
 
 INTEGER_LITERAL  {DIGIT}+{INT_SUFFIX}?
 FLOAT_LITERAL    ({DIGIT}*\.{DIGIT}+|{DIGIT}+\.){FLOAT_SUFFIX}?
@@ -160,222 +169,217 @@ BOOLEAN_LITERAL  (true|false)
 EXPONENT         [eE][+-]?{DIGIT}+
 EXPONENT_NUMBER  ({DIGIT}+\.{DIGIT}*|\.{DIGIT}+|{DIGIT}+){EXPONENT}{FLOAT_SUFFIX}?
 
-HEX_DIGIT       [0-9a-fA-F]
-OCT_DIGIT       [0-7]
-BIN_DIGIT       [01]
-HEX_LITERAL     0[xX]{HEX_DIGIT}+{INT_SUFFIX}?
-OCT_LITERAL     0{OCT_DIGIT}+{INT_SUFFIX}?
-BIN_LITERAL     0[bB]{BIN_DIGIT}+{INT_SUFFIX}?
+HEX_DIGIT        [0-9a-fA-F]
+BIN_DIGIT        [01]
+HEX_LITERAL      0[xX]{HEX_DIGIT}+{INT_SUFFIX}?
+BIN_LITERAL      0[bB]{BIN_DIGIT}+{INT_SUFFIX}?
 
-/* invalid number */
-FLOAT_BASE   ({DIGIT}+\.{DIGIT}*|\.{DIGIT}+|{DIGIT}+)
-INVALID_FLOAT1   \.{EXPONENT}
-INVALID_FLOAT_INCOMPLETE  {FLOAT_BASE}[eE][+-]?$
-INVALID_FLOAT_BAD_EXP  {FLOAT_BASE}[eE][+-]?[^0-9\n\t ;\)\}\]\,+-][a-zA-Z0-9_]*
-INVALID_IDENTIFIER {DIGIT}+{LETTER}({LETTER}|{DIGIT})*
+/* Malformed Numbers & Invalid Identifiers */
+FLOAT_BASE              ({DIGIT}*\.{DIGIT}+|{DIGIT}+\.)
+FLOAT_OR_EXP_BASE       ({FLOAT_BASE}|({DIGIT}+\.{DIGIT}*|\.{DIGIT}+|{DIGIT}+)[eE][+-]?{DIGIT}+)
+INVALID_FLOAT_SUFFIX    {FLOAT_OR_EXP_BASE}[a-zA-Z_][a-zA-Z0-9_]*
 
-/* These now consume the whole malformed token (prefix of valid digits
-   + the first bad character + any trailing alnum chars) instead of only
-   matching when the very first digit after the base is already invalid.
-   That's what makes them win flex's longest-match rule over
-   INVALID_IDENTIFIER for things like 0b1021 or 0x1G. */
-INVALID_HEX     0[xX]{HEX_DIGIT}*[g-zG-Z_][a-zA-Z0-9_]*
-INVALID_BIN     0[bB]{BIN_DIGIT}*[2-9a-zA-Z_][a-zA-Z0-9_]*
-INVALID_OCT     0{OCT_DIGIT}*[89][0-9a-zA-Z_]*
+INVALID_FLOAT_MULTI_DOT {DIGIT}+\.[0-9]*\.[0-9.]*
+INVALID_FLOAT_MULTI_DOT2 \.{DIGIT}+\.[0-9.]*
+INVALID_FLOAT_MULTI_EXP {FLOAT_BASE}[eE][+-]?{DIGIT}+[eE][+-]?[0-9a-zA-Z_.]*
+INVALID_FLOAT1          \.{EXPONENT}
+INVALID_FLOAT_INCOMPLETE {FLOAT_BASE}[eE][+-]?
+INVALID_FLOAT_BAD_EXP   {FLOAT_BASE}[eE][+-]?[^0-9\n\t ;\)\}\]\,+-][a-zA-Z0-9_]*
+INVALID_IDENTIFIER      {DIGIT}+{LETTER}({LETTER}|{DIGIT})*
 
-STRING_CONTENT   (\\.|[^"\\\r\n])*
-SINGLE_CHAR_CONTENT  (\\.|[^'\\\r\n])
-STRING_LITERAL   (L|u8|u|U)?\"({STRING_CONTENT})\"
-CHAR_LITERAL     (L|u8|u|U)?'{SINGLE_CHAR_CONTENT}'
-EMPTY_CHAR_LITERAL   (L|u8|u|U)?''
-MULTI_CHAR_LITERAL   (L|u8|u|U)?'{SINGLE_CHAR_CONTENT}{SINGLE_CHAR_CONTENT}+'
+INVALID_HEX_INCOMPLETE  0[xX][^0-9a-fA-F\n\t ;\)\}\]\,]*
+INVALID_HEX             0[xX]{HEX_DIGIT}*[g-zG-Z_][a-zA-Z0-9_]*
+INVALID_BIN_INCOMPLETE  0[bB][^01\n\t ;\)\}\]\,]*
+INVALID_BIN             0[bB]{BIN_DIGIT}*[2-9a-zA-Z_][a-zA-Z0-9_]*
 
-UNTERMINATED_STRING  (L|u8|u|U)?\"([^"\\\r\n]|\\.)*$
-UNTERMINATED_CHAR    (L|u8|u|U)?'([^'\\\r\n]|\\.)*$
+/* Escape Sequences & Strings */
+ESCAPE_SEQ              (\\[ntrbfva"'\?\\0]|\\x[0-9a-fA-F]{1,2}|\\[0-7]{1,3})
+STRING_CONTENT          ({ESCAPE_SEQ}|[^"\\\r\n])*
+SINGLE_CHAR_CONTENT     ({ESCAPE_SEQ}|[^'\\\r\n])
+STRING_LITERAL          (L|u8|u|U)?\"({STRING_CONTENT})\"
+INVALID_ESCAPE_STRING   (L|u8|u|U)?\"(\\.|[^"\\\r\n])*\"
+CHAR_LITERAL            (L|u8|u|U)?'{SINGLE_CHAR_CONTENT}'
+INVALID_ESCAPE_CHAR     (L|u8|u|U)?'\\.'
+EMPTY_CHAR_LITERAL      (L|u8|u|U)?''
+MULTI_CHAR_LITERAL      (L|u8|u|U)?'{SINGLE_CHAR_CONTENT}{SINGLE_CHAR_CONTENT}+'
 
-WHITESPACE      [ \t]+
-NEWLINE         \n
-COMMENT_SINGLE  "//".*
-COMMENT_MULTI   "/*"([^*]|\*+[^*/])*\*+"/"
-INVALID_MULTI   "/*"([^*]|\*+[^*/])*
+UNTERMINATED_STRING     (L|u8|u|U)?\"([^"\\\r\n]|\\.)*
+UNTERMINATED_CHAR       (L|u8|u|U)?'([^'\\\r\n]|\\.)*
+
+WHITESPACE              [ \t]+
+NEWLINE                 \n
+COMMENT_SINGLE          "//".*
+COMMENT_MULTI           "/*"([^*]|\*+[^*/])*\*+"/"
+INVALID_MULTI           "/*"([^*]|\*+[^*/])*
 
 %%
 
- /* preprocessor */
-^[ \t]*"#"[ \t]*"include"  { addToken("PP_INCLUDE", yytext); BEGIN(INCL); }
-<INCL>[ \t]+               ; /* skip spaces between #include and the header name */
-<INCL>"<"[^>\n]+">"        { addToken("HEADER_NAME", yytext); BEGIN(INITIAL); }
-<INCL>\"[^\"\n]+\"         { addToken("HEADER_NAME", yytext); BEGIN(INITIAL); }
-<INCL>[^ \t\n][^\n]*       { addError(yytext, "Malformed include directive"); BEGIN(INITIAL); }
-<INCL>\n                   { currentLineNumber++; currentColumn = 1; BEGIN(INITIAL); }
+ /* Preprocessor */
+^[ \t]*"#"[ \t]*"include" { addToken("PP_INCLUDE", yytext); BEGIN(INCL); }
+<INCL>[ \t]+              ; 
+<INCL>"<"[^>\n]+">"       { addToken("HEADER_NAME", yytext); BEGIN(INITIAL); }
+<INCL>\"[^\"\n]+\"       { addToken("HEADER_NAME", yytext); BEGIN(INITIAL); }
+<INCL>[^ \t\n][^\n]*     { addError(yytext, "Malformed include directive"); BEGIN(INITIAL); }
+<INCL>\n                 { BEGIN(INITIAL); }
 
-^[ \t]*"#"[ \t]*"define"   { addToken("PP_DEFINE", yytext); }
+^[ \t]*"#"[ \t]*"define"  { addToken("PP_DEFINE", yytext); }
 
-{INVALID_MULTI}       { addError(yytext, "Unterminated comment");
-                        char *p = yytext;
-                        while (*p) {
-                            if (*p == '\n') { currentLineNumber++; currentColumn = 1; }
-                            p++;
-                        }
-                      }
-{COMMENT_SINGLE}      { /* skip single-line comments */ }
-{COMMENT_MULTI}       {
-                        char *p = yytext;
-                        while (*p) {
-                            if (*p == '\n') { currentLineNumber++; currentColumn = 1; }
-                            p++;
-                        }
-                      }
+{INVALID_MULTI}         { addError(yytext, "Unterminated multi-line comment"); }
+{COMMENT_SINGLE}        { /* skip single-line comments */ }
+{COMMENT_MULTI}         { /* skip multi-line comments */ }
 
-{NEWLINE}             { currentLineNumber++; currentColumn = 1; }
-{WHITESPACE}          { /* skip whitespace */ }
-"\r"                  { /* skip carriage return */ }
+{NEWLINE}               { /* tracked by YY_USER_ACTION */ }
+{WHITESPACE}            { /* skip whitespace */ }
+"\r"                    { /* skip carriage return */ }
 
- /* keywords */
-"bool"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"break"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"case"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"char"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"const"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"continue"            { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"default"             { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"do"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"double"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"else"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"extern"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"float"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"for"                 { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"friend"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"goto"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"if"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"inline"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"int"                 { addToken("KEYWORD", yytext); addKeyword(yytext); }
+ /* Keywords */
+"bool"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"break"                 { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"case"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"char"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"const"                 { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"continue"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"default"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"do"                    { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"double"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"else"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"extern"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"float"                 { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"for"                   { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"friend"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"goto"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"if"                    { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"inline"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"int"                   { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"long"[ \t]+"long"      { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"long"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"nullptr"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"operator"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"return"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"short"                 { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"signed"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"sizeof"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"static"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"struct"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"switch"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"template"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"typename"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"typedef"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"unsigned"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"void"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"while"                 { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"class"                 { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"new"                   { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"delete"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"public"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"private"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"protected"             { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"until"                 { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"enum"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"union"                 { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"auto"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"register"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"volatile"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
+"this"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
 
-"long"[ \t]+"long"    { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"long"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+ /* Standard C Functions */
+"printf"                { addToken("PRINTF_FUNCTION", yytext); }
+"scanf"                 { addToken("SCANF_FUNCTION", yytext); }
+"malloc"                { addToken("MALLOC_FUNCTION", yytext); }
+"calloc"                { addToken("CALLOC_FUNCTION", yytext); }
+"realloc"               { addToken("REALLOC_FUNCTION", yytext); }
+"free"                  { addToken("FREE_FUNCTION", yytext); }
 
-"nullptr"             { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"operator"            { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"return"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"short"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"signed"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"sizeof"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"static"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"struct"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"switch"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"template"            { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"typename"            { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"typedef"             { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"unsigned"            { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"void"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"while"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"class"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"new"                 { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"delete"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"public"              { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"private"             { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"protected"           { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"until"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"enum"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"union"               { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"auto"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"register"            { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"volatile"            { addToken("KEYWORD", yytext); addKeyword(yytext); }
-"this"                { addToken("KEYWORD", yytext); addKeyword(yytext); }
+ /* Operators */
+"++"                    { addToken("OPERATOR", yytext); }
+"--"                    { addToken("OPERATOR", yytext); }
+"+"                     { addToken("OPERATOR", yytext); }
+"-"                     { addToken("OPERATOR", yytext); }
+"*"                     { addToken("OPERATOR", yytext); }
+"/"                     { addToken("OPERATOR", yytext); }
+"%"                     { addToken("OPERATOR", yytext); }
+"+="                    { addToken("OPERATOR", yytext); }
+"-="                    { addToken("OPERATOR", yytext); }
+"*="                    { addToken("OPERATOR", yytext); }
+"/="                    { addToken("OPERATOR", yytext); }
+"%="                    { addToken("OPERATOR", yytext); }
+"="                     { addToken("OPERATOR", yytext); }
+"=="                    { addToken("OPERATOR", yytext); }
+"!="                    { addToken("OPERATOR", yytext); }
+"<="                    { addToken("OPERATOR", yytext); }
+">="                    { addToken("OPERATOR", yytext); }
+"<"                     { addToken("OPERATOR", yytext); }
+">"                     { addToken("OPERATOR", yytext); }
+"&&"                    { addToken("OPERATOR", yytext); }
+"||"                    { addToken("OPERATOR", yytext); }
+"!"                     { addToken("OPERATOR", yytext); }
+"<<="                   { addToken("OPERATOR", yytext); }
+">>="                   { addToken("OPERATOR", yytext); }
+"<<"                    { addToken("OPERATOR", yytext); }
+">>"                    { addToken("OPERATOR", yytext); }
+"&="                    { addToken("OPERATOR", yytext); }
+"|="                    { addToken("OPERATOR", yytext); }
+"^="                    { addToken("OPERATOR", yytext); }
+"&"                     { addToken("OPERATOR", yytext); }
+"|"                     { addToken("OPERATOR", yytext); }
+"^"                     { addToken("OPERATOR", yytext); }
+"~"                     { addToken("OPERATOR", yytext); }
 
- /* library functions */
-"printf"              { addToken("PRINTF_FUNCTION", yytext); }
-"scanf"               { addToken("SCANF_FUNCTION", yytext); }
-"malloc"              { addToken("MALLOC_FUNCTION", yytext); }
-"calloc"              { addToken("CALLOC_FUNCTION", yytext); }
-"realloc"             { addToken("REALLOC_FUNCTION", yytext); }
-"free"                { addToken("FREE_FUNCTION", yytext); }
+ /* Delimiters */
+";"                     { addToken("SEMICOLON", yytext); }
+","                     { addToken("COMMA", yytext); }
+"("                     { addToken("LEFT_PAREN", yytext); }
+")"                     { addToken("RIGHT_PAREN", yytext); }
+"{"                     { addToken("LEFT_BRACE", yytext); }
+"}"                     { addToken("RIGHT_BRACE", yytext); }
+"["                     { addToken("LEFT_BRACKET", yytext); }
+"]"                     { addToken("RIGHT_BRACKET", yytext); }
+"->"                    { addToken("OPERATOR", yytext); }
+"::"                    { addToken("OPERATOR", yytext); }
+":"                     { addToken("COLON", yytext); }
+"?"                     { addToken("QUESTION_MARK", yytext); }
+"#"                     { addToken("HASH", yytext); }
 
- /* operators */
-"++"                  { addToken("OPERATOR", yytext); }
-"--"                  { addToken("OPERATOR", yytext); }
-"+"                   { addToken("OPERATOR", yytext); }
-"-"                   { addToken("OPERATOR", yytext); }
-"*"                   { addToken("OPERATOR", yytext); }
-"/"                   { addToken("OPERATOR", yytext); }
-"%"                   { addToken("OPERATOR", yytext); }
+ /* String & Character Literals */
+{STRING_LITERAL}        { addToken("STRING_LITERAL", yytext); }
+{INVALID_ESCAPE_STRING} { addError(yytext, "Invalid escape sequence in string literal"); }
+{CHAR_LITERAL}          { addToken("CHAR_LITERAL", yytext); }
+{INVALID_ESCAPE_CHAR}   { addError(yytext, "Invalid escape sequence in character literal"); }
+{EMPTY_CHAR_LITERAL}    { addError(yytext, "Empty character literal"); }
+{MULTI_CHAR_LITERAL}    { addError(yytext, "Multi-character literal"); }
+{UNTERMINATED_STRING}   { addError(yytext, "Unterminated string literal"); }
+{UNTERMINATED_CHAR}     { addError(yytext, "Unterminated character literal"); }
 
-"+="                  { addToken("OPERATOR", yytext); }
-"-="                  { addToken("OPERATOR", yytext); }
-"*="                  { addToken("OPERATOR", yytext); }
-"/="                  { addToken("OPERATOR", yytext); }
-"%="                  { addToken("OPERATOR", yytext); }
-"="                   { addToken("OPERATOR", yytext); }
+ /* Numeric Literals & Numerical Error Handling */
+{INVALID_FLOAT_MULTI_DOT}  { addError(yytext, "Multiple decimal points in float literal"); }
+{INVALID_FLOAT_MULTI_DOT2} { addError(yytext, "Multiple decimal points in float literal"); }
+{INVALID_FLOAT_MULTI_EXP}  { addError(yytext, "Multiple exponents in float literal"); }
+{INVALID_FLOAT1}           { addError(yytext, "Missing digits before exponent"); }
+{INVALID_FLOAT_INCOMPLETE} { addError(yytext, "Incomplete floating-point exponent"); }
+{INVALID_FLOAT_BAD_EXP}    { addError(yytext, "Invalid exponent in float literal"); }
 
-"=="                  { addToken("OPERATOR", yytext); }
-"!="                  { addToken("OPERATOR", yytext); }
-"<="                  { addToken("OPERATOR", yytext); }
-">="                  { addToken("OPERATOR", yytext); }
-"<"                   { addToken("OPERATOR", yytext); }
-">"                   { addToken("OPERATOR", yytext); }
+{INVALID_HEX_INCOMPLETE}   { addError(yytext, "Incomplete hexadecimal literal"); }
+{INVALID_HEX}              { addError(yytext, "Invalid hexadecimal digit"); }
+{INVALID_BIN_INCOMPLETE}   { addError(yytext, "Incomplete binary literal"); }
+{INVALID_BIN}              { addError(yytext, "Invalid binary digit"); }
 
-"&&"                  { addToken("OPERATOR", yytext); }
-"||"                  { addToken("OPERATOR", yytext); }
-"!"                   { addToken("OPERATOR", yytext); }
+{HEX_LITERAL}              { addToken("HEXADECIMAL_LITERAL", yytext); }
+{BIN_LITERAL}              { addToken("BINARY_LITERAL", yytext); }
+{EXPONENT_NUMBER}          { addToken("EXPONENT_NUMBER_LITERAL", yytext); }
+{FLOAT_LITERAL}            { addToken("FLOAT_LITERAL", yytext); }
+{INTEGER_LITERAL}          { addToken("INTEGER_LITERAL", yytext); }
+{BOOLEAN_LITERAL}          { addToken("BOOLEAN_LITERAL", yytext); }
 
-"<<="                 { addToken("OPERATOR", yytext); }
-">>="                 { addToken("OPERATOR", yytext); }
-"<<"                  { addToken("OPERATOR", yytext); }
-">>"                  { addToken("OPERATOR", yytext); }
-"&="                  { addToken("OPERATOR", yytext); }
-"|="                  { addToken("OPERATOR", yytext); }
-"^="                  { addToken("OPERATOR", yytext); }
-"&"                   { addToken("OPERATOR", yytext); }  /* also address-of / binary AND -> resolved by parser */
-"|"                   { addToken("OPERATOR", yytext); }
-"^"                   { addToken("OPERATOR", yytext); }
-"~"                   { addToken("OPERATOR", yytext); }
-
- /* delimiters */
-";"                   { addToken("SEMICOLON", yytext); }
-","                   { addToken("COMMA", yytext); }
-"("                   { addToken("LEFT_PAREN", yytext); }
-")"                   { addToken("RIGHT_PAREN", yytext); }
-"{"                   { addToken("LEFT_BRACE", yytext); }
-"}"                   { addToken("RIGHT_BRACE", yytext); }
-"["                   { addToken("LEFT_BRACKET", yytext); }
-"]"                   { addToken("RIGHT_BRACKET", yytext); }
-"->"                  { addToken("OPERATOR", yytext); }
-"::"                  { addToken("OPERATOR", yytext); }
-":"                   { addToken("COLON", yytext); }
-"?"                   { addToken("QUESTION_MARK", yytext); }
-"#"                   { addToken("HASH", yytext); }
-
-{UNTERMINATED_STRING} { addError(yytext, "Unterminated string"); }
-{UNTERMINATED_CHAR}   { addError(yytext, "Unterminated character"); }
-
- /* Invalid number formats */
-{INVALID_FLOAT1}            { addError(yytext, "Missing digits before exponent"); }
-{INVALID_FLOAT_INCOMPLETE}  { addError(yytext, "Incomplete exponent"); }
-{INVALID_FLOAT_BAD_EXP}     { addError(yytext, "Invalid exponent"); }
-{FLOAT_BASE}[eE][+-]?       { addError(yytext, "Incomplete exponent"); }
-{INVALID_HEX}                { addError(yytext, "Invalid hex literal"); }
-{INVALID_BIN}                { addError(yytext, "Invalid binary literal"); }
-{INVALID_OCT}                { addError(yytext, "Invalid octal literal"); }
-
-{HEX_LITERAL}                    { addToken("HEXADECIMAL_LITERAL", yytext); }
-{OCT_LITERAL}                    { addToken("OCTAL_LITERAL", yytext); }
-{BIN_LITERAL}                    { addToken("BINARY_LITERAL", yytext); }
-{FLOAT_BASE}[eE][+-]?{DIGIT}+    { addToken("EXPONENT_NUMBER_LITERAL", yytext); }
-{EXPONENT_NUMBER}                { addToken("EXPONENT_NUMBER_LITERAL", yytext); }
-{INTEGER_LITERAL}                { addToken("INTEGER_LITERAL", yytext); }
-{FLOAT_LITERAL}                  { addToken("FLOAT_LITERAL", yytext); }
-{BOOLEAN_LITERAL}                { addToken("BOOLEAN_LITERAL", yytext); }
-{STRING_LITERAL}                 { addToken("STRING_LITERAL", yytext); }
-{EMPTY_CHAR_LITERAL}             { addError(yytext, "Empty character literal"); }
-{MULTI_CHAR_LITERAL}             { addError(yytext, "Multi-character literal (only one character allowed)"); }
-{CHAR_LITERAL}                   { addToken("CHAR_LITERAL", yytext); }
+{INVALID_FLOAT_SUFFIX}     { addError(yytext, "Invalid suffix on floating-point literal"); }
 
  /* Identifiers */
-{IDENTIFIER}          { addToken("IDENTIFIER", yytext); addSymbol(yytext); }
-"..."                 { addToken("ELLIPSIS", yytext); }
-"."                   { addToken("DOT", yytext); }
-{INVALID_IDENTIFIER}  { addError(yytext, "Invalid identifier"); }
-.                     { addError(yytext, "Unrecognized character"); }
+"..."                    { addToken("ELLIPSIS", yytext); }
+"."                      { addToken("DOT", yytext); }
+{IDENTIFIER}             { addToken("IDENTIFIER", yytext); addSymbol(yytext); }
+{INVALID_IDENTIFIER}     { addError(yytext, "Invalid identifier (cannot start with a digit)"); }
+
+ /* Unrecognized Catch-all */
+.                        { addError(yytext, "Unrecognized character"); }
 
 %%
 
@@ -396,12 +400,7 @@ int main(int argc, char* argv[]) {
         cout << "Usage: " << argv[0] << " <input_file> [output_file] [--tables]" << endl;
         cout << "  input_file  : Source file to analyze" << endl;
         cout << "  output_file : Output file for results (optional, defaults to stdout)" << endl;
-        cout << "  --tables    : Also print the symbol/keyword tables (optional; off by default" << endl;
-        cout << "                so the default output is just the required token table)" << endl;
-        cout << "Examples:" << endl;
-        cout << "  " << argv[0] << " test.c" << endl;
-        cout << "  " << argv[0] << " test.c output.txt" << endl;
-        cout << "  " << argv[0] << " test.c output.txt --tables" << endl;
+        cout << "  --tables    : Also print the symbol/keyword tables" << endl;
         return 1;
     }
 

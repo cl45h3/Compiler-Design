@@ -3,7 +3,12 @@
 =================================================================
 ERRORS FOUND:
 -----------------------------------------------------------------
-ERROR: Invalid identifier at line 67, column 5
+ERROR: Invalid suffix on floating-point literal at line 49, column 18
+ERROR: Invalid suffix on floating-point literal at line 50, column 19
+ERROR: Invalid suffix on floating-point literal at line 51, column 18
+ERROR: Invalid suffix on floating-point literal at line 52, column 19
+ERROR: Multiple decimal points in float literal at line 60, column 5
+ERROR: Invalid identifier (cannot start with a digit) at line 61, column 5
 -----------------------------------------------------------------
 
 VALID TOKENS:
@@ -158,26 +163,18 @@ j                    IDENTIFIER
 float                KEYWORD
 bad1                 IDENTIFIER
 =                    OPERATOR
-12.3                 FLOAT_LITERAL
-u                    IDENTIFIER
 ;                    SEMICOLON
 double               KEYWORD
 bad2                 IDENTIFIER
 =                    OPERATOR
-1.5e10l              EXPONENT_NUMBER_LITERAL
-l                    IDENTIFIER
 ;                    SEMICOLON
 float                KEYWORD
 bad3                 IDENTIFIER
 =                    OPERATOR
-12.3f                FLOAT_LITERAL
-f                    IDENTIFIER
 ;                    SEMICOLON
 double               KEYWORD
 bad4                 IDENTIFIER
 =                    OPERATOR
-1.5e10               EXPONENT_NUMBER_LITERAL
-x                    IDENTIFIER
 ;                    SEMICOLON
 float                KEYWORD
 ok1                  IDENTIFIER
@@ -199,33 +196,16 @@ ok4                  IDENTIFIER
 =                    OPERATOR
 6.022e-23            EXPONENT_NUMBER_LITERAL
 ;                    SEMICOLON
-1.                   FLOAT_LITERAL
-.1                   FLOAT_LITERAL
 ;                    SEMICOLON
-1.                   FLOAT_LITERAL
-...                  ELLIPSIS
-1                    INTEGER_LITERAL
 ;                    SEMICOLON
-1.1                  FLOAT_LITERAL
-;                    SEMICOLON
-1.1                  FLOAT_LITERAL
-.1                   FLOAT_LITERAL
-.1                   FLOAT_LITERAL
-;                    SEMICOLON
-1.1f                 FLOAT_LITERAL
-it                   IDENTIFIER
-;                    SEMICOLON
-1.1                  FLOAT_LITERAL
-.1f                  FLOAT_LITERAL
-;                    SEMICOLON
-1.f                  FLOAT_LITERAL
-;                    SEMICOLON
+abs12                IDENTIFIER
+.13                  FLOAT_LITERAL
 ;                    SEMICOLON
 return               KEYWORD
 0                    INTEGER_LITERAL
 ;                    SEMICOLON
 }                    RIGHT_BRACE
 -----------------------------------------------------------------
-Total tokens found: 216
-Total errors found: 1
-Total lines processed: 70
+Total tokens found: 191
+Total errors found: 6
+Total lines processed: 65

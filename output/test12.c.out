@@ -5,22 +5,21 @@ ERRORS FOUND:
 -----------------------------------------------------------------
 ERROR: Malformed include directive at line 1, column 10
 ERROR: Missing digits before exponent at line 4, column 15
-ERROR: Incomplete exponent at line 5, column 15
-ERROR: Incomplete exponent at line 6, column 15
-ERROR: Invalid exponent at line 7, column 15
-ERROR: Invalid exponent at line 8, column 15
-ERROR: Invalid hex literal at line 10, column 13
-ERROR: Invalid binary literal at line 11, column 13
-ERROR: Invalid octal literal at line 12, column 13
-ERROR: Invalid identifier at line 14, column 9
+ERROR: Incomplete floating-point exponent at line 5, column 15
+ERROR: Incomplete floating-point exponent at line 6, column 15
+ERROR: Invalid exponent in float literal at line 7, column 15
+ERROR: Invalid exponent in float literal at line 8, column 15
+ERROR: Incomplete hexadecimal literal at line 10, column 13
+ERROR: Invalid binary digit at line 11, column 13
+ERROR: Invalid identifier (cannot start with a digit) at line 14, column 9
 ERROR: Empty character literal at line 15, column 14
-ERROR: Multi-character literal (only one character allowed) at line 16, column 14
-ERROR: Unterminated character at line 17, column 14
-ERROR: Unterminated string at line 18, column 15
+ERROR: Multi-character literal at line 16, column 14
+ERROR: Unterminated character literal at line 17, column 14
+ERROR: Unterminated string literal at line 18, column 15
 ERROR: Unrecognized character at line 20, column 13
 ERROR: Unrecognized character at line 21, column 13
 ERROR: Unrecognized character at line 21, column 17
-ERROR: Unterminated comment at line 26, column 1
+ERROR: Unterminated multi-line comment at line 26, column 1
 -----------------------------------------------------------------
 
 VALID TOKENS:
@@ -63,6 +62,7 @@ g                    IDENTIFIER
 int                  KEYWORD
 h                    IDENTIFIER
 =                    OPERATOR
+00789                INTEGER_LITERAL
 ;                    SEMICOLON
 int                  KEYWORD
 ;                    SEMICOLON
@@ -96,6 +96,6 @@ return               KEYWORD
 ;                    SEMICOLON
 }                    RIGHT_BRACE
 -----------------------------------------------------------------
-Total tokens found: 69
-Total errors found: 18
+Total tokens found: 70
+Total errors found: 17
 Total lines processed: 27

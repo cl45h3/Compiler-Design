@@ -3,7 +3,7 @@
 =================================================================
 ERRORS FOUND:
 -----------------------------------------------------------------
-ERROR: Unterminated comment at line 3, column 5
+ERROR: Unterminated multi-line comment at line 3, column 5
 -----------------------------------------------------------------
 
 VALID TOKENS:
