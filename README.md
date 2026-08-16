@@ -12,6 +12,12 @@ literals, bad identifiers, unrecognized characters, malformed `#include`)
 are collected separately and reported without stopping the scan, so a
 single run reports every lexical error in the file, not just the first.
 
+## Group Contributors
+- Vaibhav Kumar — Enrolment No. 24114103
+- Samarth Maheshwari — Enrolment No. 24114084
+- Rishabh Gupta — Enrolment No. 24114077
+- Vishal Kumar Shaw — Enrolment No. 24114105
+
 ## Prerequisites
 
 - `flex`  generates the scanner from `src/lexer.l`
