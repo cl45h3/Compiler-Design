@@ -10,7 +10,7 @@ recognized keywords are tracked in a separate keyword-frequency table.
 Lexical errors (unterminated strings/comments, malformed numeric
 literals, bad identifiers, unrecognized characters, malformed `#include`)
 are collected separately and reported without stopping the scan, so a
-single run reports every lexical error in the file, not just the first.
+single run reports every lexical error in the file, and not just the first.
 
 ## Group Contributors
 - Vaibhav Kumar — Enrolment No. 24114103
