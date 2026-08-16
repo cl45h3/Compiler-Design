@@ -1,9 +1,7 @@
 =================================================================
                     LEXICAL ANALYSIS TABLE
 =================================================================
-ERRORS FOUND:
------------------------------------------------------------------
-ERROR: Invalid exponent at line 13, column 16
+NO ERRORS FOUND
 -----------------------------------------------------------------
 
 VALID TOKENS:
@@ -68,12 +66,13 @@ j                    IDENTIFIER
 double               KEYWORD
 k                    IDENTIFIER
 =                    OPERATOR
+1E-10                EXPONENT_NUMBER_LITERAL
 ;                    SEMICOLON
 return               KEYWORD
 0                    INTEGER_LITERAL
 ;                    SEMICOLON
 }                    RIGHT_BRACE
 -----------------------------------------------------------------
-Total tokens found: 64
-Total errors found: 1
+Total tokens found: 65
+Total errors found: 0
 Total lines processed: 17
