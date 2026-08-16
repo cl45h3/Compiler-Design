@@ -20,7 +20,7 @@ int currentColumn = 1;
 int tokenStartLine = 1;
 int tokenStartColumn = 1;
 
-/* Robust line and column tracking for all tokens including multiline */
+
 #define YY_USER_ACTION { \
     tokenStartLine = currentLineNumber; \
     tokenStartColumn = currentColumn; \
