@@ -77,17 +77,17 @@ This builds the project, then runs `bin/lexer` against every file in
 
 ```
 Compiler-Design/
-├── makefile              # build rules (flex + g++), clean, run targets
-├── run.sh                # batch-runs bin/lexer over every file in test/
+├── makefile             
+├── run.sh               
 ├── src/
-│   ├── lexer.l            # flex source: token rules + C++ driver (main)
-│   └── lex.yy.cc          # generated scanner (produced by `make`, not hand-written)
+│   ├── lexer.l            
+│   └── lex.yy.cc          
 ├── bin/
-│   └── lexer               # compiled executable (produced by `make`)
+│   └── lexer              
 ├── test/
-│   └── test1.c ... test13.c, test14.cpp  # 14 sample C/C++-style input programs
+│   └── test1.c ... test13.c, test14.cpp  
 └── output/
-    └── test1.c.out ... test13.c.out, test14.cpp.out  # token tables produced by run.sh
+    └── test1.c.out ... test13.c.out, test14.cpp.out 
 ```
 
 ## Assumptions
