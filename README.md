@@ -20,6 +20,7 @@ single run reports every lexical error in the file, not just the first.
 
 On Debian/Ubuntu: `sudo apt install flex g++ make`
 On Arch: `sudo pacman -S flex gcc make`
+On MacOS: `brew install flex gcc make`
 
 ## Build
 
