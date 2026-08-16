@@ -225,12 +225,12 @@ INVALID_MULTI           "/*"([^*]|\*+[^*/])*
 ^[ \t]*"#"[ \t]*"define"  { addToken("PP_DEFINE", yytext); }
 
 {INVALID_MULTI}         { addError(yytext, "Unterminated multi-line comment"); }
-{COMMENT_SINGLE}        { /* skip single-line comments */ }
-{COMMENT_MULTI}         { /* skip multi-line comments */ }
+{COMMENT_SINGLE}        { /* skip single line comment */ }
+{COMMENT_MULTI}         { /* skip multi line comment */ }
 
-{NEWLINE}               { /* tracked by YY_USER_ACTION */ }
-{WHITESPACE}            { /* skip whitespace */ }
-"\r"                    { /* skip carriage return */ }
+{NEWLINE}               {  }
+{WHITESPACE}            {  }
+"\r"                    {  }
 
  /* Keywords */
 "bool"                  { addToken("KEYWORD", yytext); addKeyword(yytext); }
