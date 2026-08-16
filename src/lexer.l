@@ -171,7 +171,7 @@ BIN_LITERAL     0[bB]{BIN_DIGIT}+{INT_SUFFIX}?
 FLOAT_BASE   ({DIGIT}+\.{DIGIT}*|\.{DIGIT}+|{DIGIT}+)
 INVALID_FLOAT1   \.{EXPONENT}
 INVALID_FLOAT_INCOMPLETE  {FLOAT_BASE}[eE][+-]?$
-INVALID_FLOAT_BAD_EXP  {FLOAT_BASE}[eE][+-]?[^0-9\n\t ;\)\}\]\,][a-zA-Z0-9_]*
+INVALID_FLOAT_BAD_EXP  {FLOAT_BASE}[eE][+-]?[^0-9\n\t ;\)\}\]\,+-][a-zA-Z0-9_]*
 INVALID_IDENTIFIER {DIGIT}+{LETTER}({LETTER}|{DIGIT})*
 
 /* These now consume the whole malformed token (prefix of valid digits
