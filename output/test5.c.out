@@ -1,0 +1,69 @@
+=================================================================
+                    LEXICAL ANALYSIS TABLE
+=================================================================
+ERRORS FOUND:
+-----------------------------------------------------------------
+ERROR: Invalid hexadecimal digit at line 2, column 13
+ERROR: Invalid binary digit at line 3, column 13
+ERROR: Missing digits before exponent at line 5, column 15
+ERROR: Incomplete floating-point exponent at line 6, column 15
+ERROR: Incomplete floating-point exponent at line 7, column 15
+ERROR: Unterminated character literal at line 8, column 16
+ERROR: Unterminated string literal at line 9, column 15
+ERROR: Invalid identifier (cannot start with a digit) at line 10, column 9
+ERROR: Unrecognized character at line 11, column 9
+-----------------------------------------------------------------
+
+VALID TOKENS:
+LEXEME               TOKEN
+-----------------------------------------------------------------
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+int                  KEYWORD
+a                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+b                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+c                    IDENTIFIER
+=                    OPERATOR
+089                  INTEGER_LITERAL
+;                    SEMICOLON
+float                KEYWORD
+d                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+float                KEYWORD
+e                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+float                KEYWORD
+f                    IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+char                 KEYWORD
+bad                  IDENTIFIER
+=                    OPERATOR
+char                 KEYWORD
+*                    OPERATOR
+s                    IDENTIFIER
+=                    OPERATOR
+int                  KEYWORD
+;                    SEMICOLON
+int                  KEYWORD
+weird                IDENTIFIER
+;                    SEMICOLON
+return               KEYWORD
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 46
+Total errors found: 9
+Total lines processed: 14

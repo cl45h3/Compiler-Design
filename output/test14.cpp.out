@@ -1,0 +1,277 @@
+=================================================================
+                    LEXICAL ANALYSIS TABLE
+=================================================================
+ERRORS FOUND:
+-----------------------------------------------------------------
+ERROR: Invalid identifier (cannot start with a digit) at line 16, column 22
+ERROR: Invalid hexadecimal digit at line 22, column 22
+ERROR: Invalid hexadecimal digit at line 23, column 22
+ERROR: Invalid hexadecimal digit at line 24, column 22
+ERROR: Incomplete hexadecimal literal at line 25, column 22
+ERROR: Invalid binary digit at line 31, column 22
+ERROR: Invalid binary digit at line 32, column 22
+ERROR: Incomplete binary literal at line 33, column 22
+ERROR: Invalid suffix on floating-point literal at line 44, column 25
+ERROR: Multiple decimal points in float literal at line 45, column 25
+ERROR: Incomplete floating-point exponent at line 46, column 25
+ERROR: Missing digits before exponent at line 47, column 25
+ERROR: Multiple exponents in float literal at line 48, column 25
+ERROR: Invalid identifier (cannot start with a digit) at line 55, column 23
+ERROR: Empty character literal at line 68, column 24
+ERROR: Multi-character literal at line 69, column 24
+ERROR: Multi-character literal at line 70, column 24
+ERROR: Invalid escape sequence in character literal at line 71, column 24
+ERROR: Invalid escape sequence in character literal at line 72, column 24
+ERROR: Unterminated character literal at line 73, column 24
+ERROR: Unterminated character literal at line 74, column 24
+ERROR: Invalid escape sequence in string literal at line 85, column 23
+ERROR: Invalid escape sequence in string literal at line 86, column 23
+ERROR: Unterminated string literal at line 87, column 23
+ERROR: Unterminated string literal at line 88, column 23
+ERROR: Unterminated string literal at line 89, column 23
+-----------------------------------------------------------------
+
+VALID TOKENS:
+LEXEME               TOKEN
+-----------------------------------------------------------------
+#include             PP_INCLUDE
+<iostream>           HEADER_NAME
+#include             PP_INCLUDE
+<string>             HEADER_NAME
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+int                  KEYWORD
+valid_oct1           IDENTIFIER
+=                    OPERATOR
+0755                 INTEGER_LITERAL
+;                    SEMICOLON
+int                  KEYWORD
+valid_oct2           IDENTIFIER
+=                    OPERATOR
+0123u                INTEGER_LITERAL
+;                    SEMICOLON
+int                  KEYWORD
+valid_oct3           IDENTIFIER
+=                    OPERATOR
+0777ULL              INTEGER_LITERAL
+;                    SEMICOLON
+int                  KEYWORD
+bad_oct1             IDENTIFIER
+=                    OPERATOR
+0789                 INTEGER_LITERAL
+;                    SEMICOLON
+int                  KEYWORD
+bad_oct2             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+valid_hex1           IDENTIFIER
+=                    OPERATOR
+0x1A3F               HEXADECIMAL_LITERAL
+;                    SEMICOLON
+int                  KEYWORD
+valid_hex2           IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+valid_hex3           IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+bad_hex1             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+bad_hex2             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+valid_bin1           IDENTIFIER
+=                    OPERATOR
+0b1010               BINARY_LITERAL
+;                    SEMICOLON
+int                  KEYWORD
+valid_bin2           IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+bad_bin1             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+bad_bin2             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+double               KEYWORD
+valid_flt1           IDENTIFIER
+=                    OPERATOR
+12.34                FLOAT_LITERAL
+;                    SEMICOLON
+double               KEYWORD
+valid_flt2           IDENTIFIER
+=                    OPERATOR
+.567f                FLOAT_LITERAL
+;                    SEMICOLON
+double               KEYWORD
+valid_flt3           IDENTIFIER
+=                    OPERATOR
+100.f                FLOAT_LITERAL
+;                    SEMICOLON
+double               KEYWORD
+valid_flt4           IDENTIFIER
+=                    OPERATOR
+1.2e-3               EXPONENT_NUMBER_LITERAL
+;                    SEMICOLON
+double               KEYWORD
+valid_flt5           IDENTIFIER
+=                    OPERATOR
+3.14159L             FLOAT_LITERAL
+;                    SEMICOLON
+double               KEYWORD
+bad_flt1             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+double               KEYWORD
+bad_flt2             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+double               KEYWORD
+bad_flt3             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+double               KEYWORD
+bad_flt4             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+double               KEYWORD
+bad_flt5             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+int                  KEYWORD
+valid_int            IDENTIFIER
+=                    OPERATOR
+12345                INTEGER_LITERAL
+;                    SEMICOLON
+int                  KEYWORD
+valid_id             IDENTIFIER
+=                    OPERATOR
+var_name123          IDENTIFIER
+;                    SEMICOLON
+int                  KEYWORD
+bad_id               IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+auto                 KEYWORD
+valid_char1          IDENTIFIER
+=                    OPERATOR
+'a'                  CHAR_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+valid_char2          IDENTIFIER
+=                    OPERATOR
+L'B'                 CHAR_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+valid_char3          IDENTIFIER
+=                    OPERATOR
+u8'C'                CHAR_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+valid_char4          IDENTIFIER
+=                    OPERATOR
+u'D'                 CHAR_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+valid_char5          IDENTIFIER
+=                    OPERATOR
+U'E'                 CHAR_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+valid_char6          IDENTIFIER
+=                    OPERATOR
+'\n'                 CHAR_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+valid_char7          IDENTIFIER
+=                    OPERATOR
+'\x41'               CHAR_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+bad_char1            IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+auto                 KEYWORD
+bad_char2            IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+auto                 KEYWORD
+bad_char3            IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+auto                 KEYWORD
+bad_char4            IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+auto                 KEYWORD
+bad_char5            IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+auto                 KEYWORD
+bad_char6            IDENTIFIER
+=                    OPERATOR
+auto                 KEYWORD
+bad_char7            IDENTIFIER
+=                    OPERATOR
+auto                 KEYWORD
+valid_str1           IDENTIFIER
+=                    OPERATOR
+"Hello\nWorld"       STRING_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+valid_str2           IDENTIFIER
+=                    OPERATOR
+L"Wide String"       STRING_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+valid_str3           IDENTIFIER
+=                    OPERATOR
+u8"UTF-8"            STRING_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+valid_str4           IDENTIFIER
+=                    OPERATOR
+u"UTF-16"            STRING_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+valid_str5           IDENTIFIER
+=                    OPERATOR
+U"UTF-32"            STRING_LITERAL
+;                    SEMICOLON
+auto                 KEYWORD
+bad_str1             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+auto                 KEYWORD
+bad_str2             IDENTIFIER
+=                    OPERATOR
+;                    SEMICOLON
+auto                 KEYWORD
+bad_str3             IDENTIFIER
+=                    OPERATOR
+auto                 KEYWORD
+bad_str4             IDENTIFIER
+=                    OPERATOR
+auto                 KEYWORD
+bad_str5             IDENTIFIER
+=                    OPERATOR
+return               KEYWORD
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 237
+Total errors found: 26
+Total lines processed: 92

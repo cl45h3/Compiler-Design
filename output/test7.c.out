@@ -1,0 +1,25 @@
+=================================================================
+                    LEXICAL ANALYSIS TABLE
+=================================================================
+ERRORS FOUND:
+-----------------------------------------------------------------
+ERROR: Unterminated multi-line comment at line 3, column 5
+-----------------------------------------------------------------
+
+VALID TOKENS:
+LEXEME               TOKEN
+-----------------------------------------------------------------
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+int                  KEYWORD
+a                    IDENTIFIER
+=                    OPERATOR
+1                    INTEGER_LITERAL
+;                    SEMICOLON
+-----------------------------------------------------------------
+Total tokens found: 10
+Total errors found: 1
+Total lines processed: 10

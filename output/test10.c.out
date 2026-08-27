@@ -1,0 +1,113 @@
+=================================================================
+                    LEXICAL ANALYSIS TABLE
+=================================================================
+NO ERRORS FOUND
+-----------------------------------------------------------------
+
+VALID TOKENS:
+LEXEME               TOKEN
+-----------------------------------------------------------------
+class                KEYWORD
+Point                IDENTIFIER
+{                    LEFT_BRACE
+public               KEYWORD
+:                    COLON
+int                  KEYWORD
+x                    IDENTIFIER
+;                    SEMICOLON
+int                  KEYWORD
+y                    IDENTIFIER
+;                    SEMICOLON
+int                  KEYWORD
+getX                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+return               KEYWORD
+x                    IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+private              KEYWORD
+:                    COLON
+int                  KEYWORD
+hidden               IDENTIFIER
+;                    SEMICOLON
+protected            KEYWORD
+:                    COLON
+int                  KEYWORD
+shared               IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+;                    SEMICOLON
+class                KEYWORD
+Rectangle            IDENTIFIER
+{                    LEFT_BRACE
+public               KEYWORD
+:                    COLON
+Point                IDENTIFIER
+topLeft              IDENTIFIER
+;                    SEMICOLON
+Point                IDENTIFIER
+bottomRight          IDENTIFIER
+;                    SEMICOLON
+int                  KEYWORD
+area                 IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+;                    SEMICOLON
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+Point                IDENTIFIER
+p1                   IDENTIFIER
+;                    SEMICOLON
+p1                   IDENTIFIER
+.                    DOT
+x                    IDENTIFIER
+=                    OPERATOR
+10                   INTEGER_LITERAL
+;                    SEMICOLON
+p1                   IDENTIFIER
+.                    DOT
+y                    IDENTIFIER
+=                    OPERATOR
+20                   INTEGER_LITERAL
+;                    SEMICOLON
+Point                IDENTIFIER
+*                    OPERATOR
+pptr                 IDENTIFIER
+=                    OPERATOR
+&                    OPERATOR
+p1                   IDENTIFIER
+;                    SEMICOLON
+pptr                 IDENTIFIER
+->                   OPERATOR
+x                    IDENTIFIER
+=                    OPERATOR
+30                   INTEGER_LITERAL
+;                    SEMICOLON
+Rectangle            IDENTIFIER
+rect                 IDENTIFIER
+;                    SEMICOLON
+rect                 IDENTIFIER
+.                    DOT
+topLeft              IDENTIFIER
+=                    OPERATOR
+p1                   IDENTIFIER
+;                    SEMICOLON
+rect                 IDENTIFIER
+.                    DOT
+area                 IDENTIFIER
+=                    OPERATOR
+100                  INTEGER_LITERAL
+;                    SEMICOLON
+return               KEYWORD
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 100
+Total errors found: 0
+Total lines processed: 38
