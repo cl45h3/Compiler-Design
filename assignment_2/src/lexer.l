@@ -11,6 +11,7 @@
 #include <cstring>
 #include "parser.tab.h"
 using std::string; using std::vector; using std::map; using std::set; using std::cout; using std::endl;
+extern void reportSyntaxErrorAt(int line, int column, const char* message);
 
 int currentLineNumber = 1, currentColumn = 1, tokenStartLine = 1, tokenStartColumn = 1;
 #define YY_USER_ACTION { tokenStartLine=currentLineNumber; tokenStartColumn=currentColumn; for(int i=0;i<yyleng;i++){ if(yytext[i]=='\n'){currentLineNumber++;currentColumn=1;} else if(yytext[i]=='\t') currentColumn+=4; else currentColumn++; } }
@@ -34,7 +35,7 @@ void printTokenTable(){ cout << "===============================================
 #define KEY(code) do { addToken("KEYWORD",yytext); addKeyword(yytext); yylval.text=strdup(yytext); return code; } while(0)
 %}
 %option noyywrap nounput noinput
-%x INCL
+%x INCL BADPP
 
 DIGIT [0-9]
 LETTER [a-zA-Z_]
@@ -57,15 +58,15 @@ FLOAT_BASE ({DIGIT}*\.{DIGIT}+|{DIGIT}+\.)
 FLOAT_OR_EXP_BASE ({FLOAT_BASE}|({DIGIT}+\.{DIGIT}*|\.{DIGIT}+|{DIGIT}+)[eE][+-]?{DIGIT}+)
 INVALID_FLOAT_SUFFIX {FLOAT_OR_EXP_BASE}[a-zA-Z_][a-zA-Z0-9_]*
 INVALID_FLOAT_MULTI_DOT {DIGIT}+\.[0-9]*\.[0-9.]*
-INVALID_FLOAT_MULTI_DOT2 \.[0-9]+\.[0-9.]*
+INVALID_FLOAT_MULTI_DOT2 \.{DIGIT}+\.[0-9.]*
 INVALID_FLOAT_MULTI_EXP {FLOAT_BASE}[eE][+-]?{DIGIT}+[eE][+-]?[0-9a-zA-Z_.]*
-INVALID_FLOAT1 \.(e|E)[+-]?{DIGIT}+
+INVALID_FLOAT1 \.{EXPONENT}
 INVALID_FLOAT_INCOMPLETE {FLOAT_BASE}[eE][+-]?
 INVALID_FLOAT_BAD_EXP {FLOAT_BASE}[eE][+-]?[^0-9\n\t ;\)\}\]\,+-][a-zA-Z0-9_]*
 INVALID_IDENTIFIER {DIGIT}+{LETTER}({LETTER}|{DIGIT})*
-INVALID_HEX_INCOMPLETE 0[xX][^0-9a-fA-F\n\t ;\)\}\] ,]*
+INVALID_HEX_INCOMPLETE 0[xX][^0-9a-fA-F\n\t ;\)\}\]\,]*
 INVALID_HEX 0[xX]{HEX_DIGIT}*[g-zG-Z_][a-zA-Z0-9_]*
-INVALID_BIN_INCOMPLETE 0[bB][^01\n\t ;\)\}\] ,]*
+INVALID_BIN_INCOMPLETE 0[bB][^01\n\t ;\)\}\]\,]*
 INVALID_BIN 0[bB]{BIN_DIGIT}*[2-9a-zA-Z_][a-zA-Z0-9_]*
 ESCAPE_SEQ (\\[ntrbfva"'\?\\0]|\\x[0-9a-fA-F]{1,2}|\\[0-7]{1,3})
 STRING_CONTENT ({ESCAPE_SEQ}|[^"\\\r\n])*
@@ -90,6 +91,10 @@ INVALID_MULTI "/*"([^*]|\*+[^*/])*
 <INCL>\"[^\"\n]+\" { addToken("HEADER_NAME",yytext); yylval.text=strdup(yytext); BEGIN(INITIAL); return HEADER_NAME; }
 <INCL>[^ \t\n][^\n]* { addError(yytext,"Malformed include directive"); BEGIN(INITIAL); }
 <INCL>\n { BEGIN(INITIAL); }
+ /* A non-line-start #include becomes one recovery token; BADPP skips its line. */
+"#"/[ \t]*"include" { addToken("HASH",yytext); addError(yytext,"Misplaced preprocessor directive"); reportSyntaxErrorAt(tokenStartLine,tokenStartColumn,"preprocessor directive must begin a line"); yylval.text=strdup(yytext); BEGIN(BADPP); return MALFORMED_DIRECTIVE; }
+<BADPP>[^\n]* { BEGIN(INITIAL); }
+<BADPP>\n { BEGIN(INITIAL); }
 ^[ \t]*"#"[ \t]*"define" { RET("PP_DEFINE",PP_DEFINE); }
 {INVALID_MULTI} { addError(yytext,"Unterminated multi-line comment"); }
 {COMMENT_SINGLE} ;

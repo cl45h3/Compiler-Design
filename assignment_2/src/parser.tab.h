@@ -154,9 +154,10 @@
      HASH = 370,
      DOT = 371,
      ELLIPSIS = 372,
-     UNARY = 373,
-     UMINUS = 374,
-     LOWER_THAN_ELSE = 375
+     MALFORMED_DIRECTIVE = 373,
+     UNARY = 374,
+     UMINUS = 375,
+     LOWER_THAN_ELSE = 376
    };
 #endif
 /* Tokens.  */
@@ -275,19 +276,20 @@
 #define HASH 370
 #define DOT 371
 #define ELLIPSIS 372
-#define UNARY 373
-#define UMINUS 374
-#define LOWER_THAN_ELSE 375
+#define MALFORMED_DIRECTIVE 373
+#define UNARY 374
+#define UMINUS 375
+#define LOWER_THAN_ELSE 376
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 34 "src/parser.y"
+#line 37 "src/parser.y"
 { char* text; }
 /* Line 1529 of yacc.c.  */
-#line 291 "src/parser.tab.h"
+#line 293 "src/parser.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

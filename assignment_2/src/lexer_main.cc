@@ -7,6 +7,10 @@
  * uses scanner actions that populate it, so it owns the standalone instance. */
 YYSTYPE yylval;
 
+/* The parser provides this diagnostic sink. Lexer-only mode intentionally
+ * reports lexical diagnostics only, just as Assignment 1 did. */
+void reportSyntaxErrorAt(int, int, const char*) { }
+
 extern FILE* yyin;
 extern int yylex();
 extern void printTokenTable();

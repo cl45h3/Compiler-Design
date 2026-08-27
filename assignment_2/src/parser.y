@@ -29,21 +29,24 @@ static void addSyntaxError(const char* message) {
         syntaxErrorList.back().column == tokenStartColumn) return;
     syntaxErrorList.push_back({message, tokenStartLine, tokenStartColumn});
 }
+void reportSyntaxErrorAt(int line, int column, const char* message) {
+    syntaxErrorList.push_back({message, line, column});
+}
 %}
 
 %union { char* text; }
 %debug
 /* Audited with bison -v: C/C++ declarator/expression lookahead ambiguities. */
-%expect 30
+%expect 43
 
 %token <text> BOOL BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE EXTERN FLOAT FOR FRIEND GOTO IF INLINE INT LONG LONG_LONG NULLPTR OPERATOR RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TEMPLATE TYPENAME TYPEDEF UNSIGNED VOID WHILE CLASS NEW DELETE PUBLIC PRIVATE PROTECTED UNTIL ENUM UNION AUTO REGISTER VOLATILE THIS
 %token <text> IDENTIFIER TYPE_NAME INTEGER_LITERAL FLOAT_LITERAL EXPONENT_NUMBER_LITERAL HEXADECIMAL_LITERAL BINARY_LITERAL BOOLEAN_LITERAL STRING_LITERAL CHAR_LITERAL
 %token <text> PRINTF_FUNCTION SCANF_FUNCTION MALLOC_FUNCTION CALLOC_FUNCTION REALLOC_FUNCTION FREE_FUNCTION
 %token <text> PP_INCLUDE HEADER_NAME PP_DEFINE
 %token <text> INC DEC PLUS MINUS STAR SLASH PERCENT ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ASSIGN EQ NE LE GE LT GT ANDAND OROR NOT SHL_ASSIGN SHR_ASSIGN SHL SHR AND_ASSIGN OR_ASSIGN XOR_ASSIGN BITAND BITOR BITXOR BITNOT ARROW SCOPE
-%token <text> SEMICOLON COMMA LEFT_PAREN RIGHT_PAREN LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET COLON QUESTION_MARK HASH DOT ELLIPSIS
+%token <text> SEMICOLON COMMA LEFT_PAREN RIGHT_PAREN LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET COLON QUESTION_MARK HASH DOT ELLIPSIS MALFORMED_DIRECTIVE
 
-%type <text> declarator direct_declarator named_identifier qualified_name class_head struct_head enum_head union_head
+%type <text> declarator direct_declarator function_pointer_declarator function_declarator function_direct_declarator named_identifier qualified_name class_head struct_head enum_head union_head
 
 %right ASSIGN ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN AND_ASSIGN OR_ASSIGN XOR_ASSIGN SHL_ASSIGN SHR_ASSIGN
 %right QUESTION_MARK COLON
@@ -75,6 +78,7 @@ translation_unit
 external_declaration
     : preprocessor_directive
     | function_definition
+    | function_declaration
     | declaration
     | typedef_declaration
     | class_declaration
@@ -82,13 +86,16 @@ external_declaration
     | enum_declaration
     | union_declaration
     | template_declaration
-    | error SEMICOLON { yyerrok; }
+    /* A missing function parameter list ends at its closing brace. This keeps
+       recovery local instead of eating a later function's return statement. */
+    | error RIGHT_BRACE { yyerrok; }
     ;
 
 preprocessor_directive
     : PP_INCLUDE HEADER_NAME
     | PP_DEFINE IDENTIFIER constant_expression
     | PP_DEFINE IDENTIFIER
+    | IDENTIFIER MALFORMED_DIRECTIVE
     ;
 
 template_declaration
@@ -140,6 +147,7 @@ member_list
 member_declaration
     : access_specifier COLON
     | function_definition
+    | function_declaration
     | declaration
     | typedef_declaration
     | class_declaration
@@ -147,7 +155,6 @@ member_declaration
     | enum_declaration
     | union_declaration
     | constructor_definition
-    | error SEMICOLON { yyerrok; }
     ;
 constructor_definition
     : qualified_name LEFT_PAREN parameter_list_opt RIGHT_PAREN compound_statement
@@ -176,11 +183,14 @@ enumerator_list
     ;
 
 function_definition
-    : declaration_specifiers declarator compound_statement
+    : declaration_specifiers function_declarator compound_statement
     ;
 
 declaration
     : declaration_specifiers init_declarator_list SEMICOLON
+    ;
+function_declaration
+    : declaration_specifiers function_declarator SEMICOLON
     ;
 typedef_declaration
     : TYPEDEF declaration_specifiers typedef_declarator_list SEMICOLON
@@ -237,6 +247,7 @@ init_declarator_list
 init_declarator
     : declarator
     | declarator ASSIGN initializer
+    | declarator LEFT_PAREN argument_expression_list_opt RIGHT_PAREN
     ;
 initializer
     : assignment_expression
@@ -253,6 +264,7 @@ initializer_list
 
 declarator
     : pointer_opt reference_opt direct_declarator { $$ = $3; }
+    | function_pointer_declarator { $$ = $1; }
     ;
 reference_opt
     : /* empty */ | reference
@@ -281,8 +293,21 @@ direct_declarator
     | OPERATOR overload_operator { $$ = $1; }
     | LEFT_PAREN declarator RIGHT_PAREN { $$ = $2; }
     | direct_declarator LEFT_BRACKET constant_expression_opt RIGHT_BRACKET { $$ = $1; }
-    | direct_declarator LEFT_PAREN parameter_list_opt RIGHT_PAREN { $$ = $1; }
-    | direct_declarator LEFT_PAREN argument_expression_list RIGHT_PAREN { $$ = $1; }
+    ;
+/* Kept separate from ordinary declarators so `Type object(args)` is direct
+   initialization rather than an attempted parameter declaration. */
+function_pointer_declarator
+    : LEFT_PAREN pointer named_identifier RIGHT_PAREN LEFT_PAREN parameter_list_opt RIGHT_PAREN { $$ = $3; }
+    ;
+/* Unlike a variable declarator, a function definition must contain (...). */
+function_declarator
+    : pointer_opt reference_opt function_direct_declarator { $$ = $3; }
+    ;
+function_direct_declarator
+    : named_identifier LEFT_PAREN parameter_list_opt RIGHT_PAREN { $$ = $1; }
+    | qualified_name LEFT_PAREN parameter_list_opt RIGHT_PAREN { $$ = $1; }
+    | OPERATOR overload_operator LEFT_PAREN parameter_list_opt RIGHT_PAREN { $$ = $1; }
+    | LEFT_PAREN function_declarator RIGHT_PAREN LEFT_PAREN parameter_list_opt RIGHT_PAREN { $$ = $2; }
     ;
 overload_operator
     : PLUS | MINUS | STAR | SLASH | PERCENT | ASSIGN | EQ | LT | GT | LEFT_BRACKET RIGHT_BRACKET | LEFT_PAREN RIGHT_PAREN
@@ -306,7 +331,6 @@ parameter_declaration
 
 compound_statement
     : LEFT_BRACE block_item_list_opt RIGHT_BRACE
-    | LEFT_BRACE error RIGHT_BRACE { yyerrok; }
     ;
 block_item_list_opt
     : /* empty */ | block_item_list

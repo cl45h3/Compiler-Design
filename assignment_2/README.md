@@ -28,7 +28,7 @@ tests do not stop the batch run.
 ```
 src/parser.y       Bison grammar, precedence, recovery, and driver
 src/lexer.l        Adapted Assignment 1 scanner and Bison token bridge
-test/              11 self-describing source tests plus EXPECTED.md
+test/              13 self-describing source tests plus EXPECTED.md
 makefile           Build rules for parser.tab.cc, lex.yy.cc, and executable
 run.sh             Batch runner
 ```
@@ -113,8 +113,10 @@ the parser:
 
 - Raw `#include` and `#define` are recognized only at the first
   non-whitespace position of a line. Includes require same-line `<...>` or
-  `"..."`; malformed includes are lexical errors. Macro bodies are ordinary
-  tokens and are never expanded.
+  `"..."`; malformed includes are lexical errors. A later `#include` (for
+  example `goe #include <iostream>`) produces a misplaced-directive lexical
+  diagnostic and a syntax diagnostic, without consuming the next source line.
+  Macro bodies are ordinary tokens and are never expanded.
 - Decimal-looking leading-zero numbers are accepted without octal validation.
   Integer suffix ordering is deliberately permissive. Invalid digit-leading
   identifiers, malformed hex/binary literals, malformed exponents, multiple
