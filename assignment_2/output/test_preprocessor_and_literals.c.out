@@ -1,0 +1,41 @@
+=================================================================
+                    SYNTAX ANALYSIS TOKEN TABLE
+=================================================================
+Token                Token_Type
+-----------------------------------------------------------------
+#include             PP_INCLUDE
+<stdio.h>            HEADER_NAME
+#define              PP_DEFINE
+LIMIT                IDENTIFIER
+0x10                 HEXADECIMAL_LITERAL
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+int                  KEYWORD
+b                    IDENTIFIER
+=                    OPERATOR
+0b1010               BINARY_LITERAL
+;                    SEMICOLON
+double               KEYWORD
+n                    IDENTIFIER
+=                    OPERATOR
+1.2e3                EXPONENT_NUMBER_LITERAL
+;                    SEMICOLON
+bool                 KEYWORD
+ok                   IDENTIFIER
+=                    OPERATOR
+true                 BOOLEAN_LITERAL
+;                    SEMICOLON
+char                 KEYWORD
+c                    IDENTIFIER
+=                    OPERATOR
+'\n'                 CHAR_LITERAL
+;                    SEMICOLON
+return               KEYWORD
+b                    IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 34
