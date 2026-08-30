@@ -3,32 +3,32 @@
 =================================================================
 ERRORS FOUND:
 -----------------------------------------------------------------
-ERROR: Invalid identifier (cannot start with a digit) at line 16, column 22
-ERROR: Invalid hexadecimal digit at line 22, column 22
-ERROR: Invalid hexadecimal digit at line 23, column 22
-ERROR: Invalid hexadecimal digit at line 24, column 22
-ERROR: Incomplete hexadecimal literal at line 25, column 22
-ERROR: Invalid binary digit at line 31, column 22
-ERROR: Invalid binary digit at line 32, column 22
-ERROR: Incomplete binary literal at line 33, column 22
-ERROR: Invalid suffix on floating-point literal at line 44, column 25
-ERROR: Multiple decimal points in float literal at line 45, column 25
-ERROR: Incomplete floating-point exponent at line 46, column 25
-ERROR: Missing digits before exponent at line 47, column 25
-ERROR: Multiple exponents in float literal at line 48, column 25
-ERROR: Invalid identifier (cannot start with a digit) at line 55, column 23
-ERROR: Empty character literal at line 68, column 24
-ERROR: Multi-character literal at line 69, column 24
-ERROR: Multi-character literal at line 70, column 24
-ERROR: Invalid escape sequence in character literal at line 71, column 24
-ERROR: Invalid escape sequence in character literal at line 72, column 24
-ERROR: Unterminated character literal at line 73, column 24
-ERROR: Unterminated character literal at line 74, column 24
-ERROR: Invalid escape sequence in string literal at line 85, column 23
-ERROR: Invalid escape sequence in string literal at line 86, column 23
-ERROR: Unterminated string literal at line 87, column 23
-ERROR: Unterminated string literal at line 88, column 23
-ERROR: Unterminated string literal at line 89, column 23
+ERROR: Invalid identifier (cannot start with a digit) at line 10, column 22
+ERROR: Invalid hexadecimal digit at line 13, column 22
+ERROR: Invalid hexadecimal digit at line 14, column 22
+ERROR: Invalid hexadecimal digit at line 15, column 22
+ERROR: Incomplete hexadecimal literal at line 16, column 22
+ERROR: Invalid binary digit at line 19, column 22
+ERROR: Invalid binary digit at line 20, column 22
+ERROR: Incomplete binary literal at line 21, column 22
+ERROR: Invalid suffix on floating-point literal at line 29, column 25
+ERROR: Multiple decimal points in float literal at line 30, column 25
+ERROR: Incomplete floating-point exponent at line 31, column 25
+ERROR: Missing digits before exponent at line 32, column 25
+ERROR: Multiple exponents in float literal at line 33, column 25
+ERROR: Invalid identifier (cannot start with a digit) at line 38, column 23
+ERROR: Empty character literal at line 48, column 24
+ERROR: Multi-character literal at line 49, column 24
+ERROR: Multi-character literal at line 50, column 24
+ERROR: Invalid escape sequence in character literal at line 51, column 24
+ERROR: Invalid escape sequence in character literal at line 52, column 24
+ERROR: Unterminated character literal at line 53, column 24
+ERROR: Unterminated character literal at line 54, column 24
+ERROR: Invalid escape sequence in string literal at line 63, column 23
+ERROR: Invalid escape sequence in string literal at line 64, column 23
+ERROR: Unterminated string literal at line 65, column 23
+ERROR: Unterminated string literal at line 66, column 23
+ERROR: Unterminated string literal at line 67, column 23
 -----------------------------------------------------------------
 
 VALID TOKENS:
@@ -274,4 +274,4 @@ return               KEYWORD
 -----------------------------------------------------------------
 Total tokens found: 237
 Total errors found: 26
-Total lines processed: 92
+Total lines processed: 69

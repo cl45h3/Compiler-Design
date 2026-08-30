@@ -942,7 +942,7 @@ int currentColumn = 1;
 int tokenStartLine = 1;
 int tokenStartColumn = 1;
 
-/* Robust line and column tracking for all tokens including multiline */
+
 #define YY_USER_ACTION { \
     tokenStartLine = currentLineNumber; \
     tokenStartColumn = currentColumn; \
@@ -1398,29 +1398,29 @@ YY_RULE_SETUP
 case 9:
 YY_RULE_SETUP
 #line 229 "src/lexer.l"
-{ /* skip single-line comments */ }
+{ /* skip single line comment */ }
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
 #line 230 "src/lexer.l"
-{ /* skip multi-line comments */ }
+{ /* skip multi line comment */ }
 	YY_BREAK
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
 #line 232 "src/lexer.l"
-{ /* tracked by YY_USER_ACTION */ }
+{  }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 233 "src/lexer.l"
-{ /* skip whitespace */ }
+{  }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 234 "src/lexer.l"
-{ /* skip carriage return */ }
+{  }
 	YY_BREAK
 /* Keywords */
 case 14:
@@ -3106,3 +3106,4 @@ int main(int argc, char* argv[]) {
     fclose(inputFile);
     return errorList.empty() ? 0 : 1;
 }
+

@@ -28,7 +28,7 @@ tests do not stop the batch run.
 ```
 src/parser.y       Bison grammar, precedence, recovery, and driver
 src/lexer.l        Adapted Assignment 1 scanner and Bison token bridge
-test/              13 self-describing source tests plus EXPECTED.md
+test/              15 self-describing source tests plus EXPECTED.md
 makefile           Build rules for parser.tab.cc, lex.yy.cc, and executable
 run.sh             Batch runner
 ```
@@ -76,7 +76,8 @@ The checked behavior is exercised by `test_class_template_typedef.cpp`.
 
 - declarations, arrays (recursive suffixes), initializer lists, multi-level
   qualified pointers, references, function pointers, prototypes/definitions,
-  calls, recursive calls, and variadic parameters;
+  calls, recursive calls, variadic parameters, default arguments, function
+  trailing `const`/`volatile`, and syntactic `constexpr` declarations;
 - all arithmetic, bitwise, comparison, logical, assignment, conditional,
   cast, unary, postfix, member, subscript, call, `sizeof`, `new`, and `delete`
   expression forms;
@@ -105,6 +106,11 @@ function-declarator/constructor-style ambiguities as shift/reduce conflicts;
 shift is the intended interpretation where the next token distinguishes the
 form. The dangling-else ambiguity is resolved by precedence rather than left
 unexamined. The report is generated on every build for review.
+
+The original Assignment 1 keyword vocabulary is preserved. `constexpr` is the
+one parser extension added for the supplied C++ declaration test; it is shown
+as `KEYWORD` and parsed only as a declaration specifier. Its required constant
+initializer is semantic validation and is intentionally not enforced here.
 
 ## Preserved lexical assumptions
 

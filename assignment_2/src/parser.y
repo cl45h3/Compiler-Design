@@ -39,7 +39,7 @@ void reportSyntaxErrorAt(int line, int column, const char* message) {
 /* Audited with bison -v: C/C++ declarator/expression lookahead ambiguities. */
 %expect 43
 
-%token <text> BOOL BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE EXTERN FLOAT FOR FRIEND GOTO IF INLINE INT LONG LONG_LONG NULLPTR OPERATOR RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TEMPLATE TYPENAME TYPEDEF UNSIGNED VOID WHILE CLASS NEW DELETE PUBLIC PRIVATE PROTECTED UNTIL ENUM UNION AUTO REGISTER VOLATILE THIS
+%token <text> BOOL BREAK CASE CHAR CONST CONSTEXPR CONTINUE DEFAULT DO DOUBLE ELSE EXTERN FLOAT FOR FRIEND GOTO IF INLINE INT LONG LONG_LONG NULLPTR OPERATOR RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TEMPLATE TYPENAME TYPEDEF UNSIGNED VOID WHILE CLASS NEW DELETE PUBLIC PRIVATE PROTECTED UNTIL ENUM UNION AUTO REGISTER VOLATILE THIS
 %token <text> IDENTIFIER TYPE_NAME INTEGER_LITERAL FLOAT_LITERAL EXPONENT_NUMBER_LITERAL HEXADECIMAL_LITERAL BINARY_LITERAL BOOLEAN_LITERAL STRING_LITERAL CHAR_LITERAL
 %token <text> PRINTF_FUNCTION SCANF_FUNCTION MALLOC_FUNCTION CALLOC_FUNCTION REALLOC_FUNCTION FREE_FUNCTION
 %token <text> PP_INCLUDE HEADER_NAME PP_DEFINE
@@ -212,7 +212,7 @@ declaration_prefix_opt
     | declaration_prefix_opt declaration_prefix
     ;
 declaration_prefix
-    : type_qualifier | storage_class_specifier | function_specifier
+    : type_qualifier | storage_class_specifier | function_specifier | constexpr_specifier
     ;
 type_suffixes
     : /* empty */
@@ -226,6 +226,9 @@ storage_class_specifier
     ;
 function_specifier
     : INLINE
+    ;
+constexpr_specifier
+    : CONSTEXPR
     ;
 type_qualifier
     : CONST | VOLATILE
@@ -270,7 +273,7 @@ reference_opt
     : /* empty */ | reference
     ;
 reference
-    : BITAND | BITAND reference
+    : BITAND | ANDAND
     ;
 pointer_opt
     : /* empty */
@@ -301,7 +304,14 @@ function_pointer_declarator
     ;
 /* Unlike a variable declarator, a function definition must contain (...). */
 function_declarator
-    : pointer_opt reference_opt function_direct_declarator { $$ = $3; }
+    : pointer_opt reference_opt function_direct_declarator function_cv_qualifier_seq_opt { $$ = $3; }
+    ;
+/* Function cv qualifiers are syntactically part of a declarator. Whether a
+   particular declaration is a non-static member function is semantic scope
+   checking and intentionally outside this lexer/parser project. */
+function_cv_qualifier_seq_opt
+    : /* empty */
+    | function_cv_qualifier_seq_opt type_qualifier
     ;
 function_direct_declarator
     : named_identifier LEFT_PAREN parameter_list_opt RIGHT_PAREN { $$ = $1; }
@@ -325,8 +335,15 @@ parameter_list
     | ELLIPSIS
     ;
 parameter_declaration
-    : declaration_specifiers declarator
-    | declaration_specifiers
+    : declaration_specifiers parameter_declarator default_argument_opt
+    | declaration_specifiers default_argument_opt
+    ;
+parameter_declarator
+    : declarator
+    ;
+default_argument_opt
+    : /* empty */
+    | ASSIGN initializer
     ;
 
 compound_statement
@@ -395,7 +412,9 @@ expression
     ;
 assignment_expression
     : conditional_expression
-    | unary_expression assignment_operator assignment_expression
+    /* C++ parses the complete logical-or expression on the left. Whether it
+       is a modifiable lvalue (10 += 20, a + b = 102) is semantic analysis. */
+    | logical_or_expression assignment_operator assignment_expression
     ;
 assignment_operator
     : ASSIGN | ADD_ASSIGN | SUB_ASSIGN | MUL_ASSIGN | DIV_ASSIGN | MOD_ASSIGN

@@ -44,120 +44,121 @@
      CASE = 260,
      CHAR = 261,
      CONST = 262,
-     CONTINUE = 263,
-     DEFAULT = 264,
-     DO = 265,
-     DOUBLE = 266,
-     ELSE = 267,
-     EXTERN = 268,
-     FLOAT = 269,
-     FOR = 270,
-     FRIEND = 271,
-     GOTO = 272,
-     IF = 273,
-     INLINE = 274,
-     INT = 275,
-     LONG = 276,
-     LONG_LONG = 277,
-     NULLPTR = 278,
-     OPERATOR = 279,
-     RETURN = 280,
-     SHORT = 281,
-     SIGNED = 282,
-     SIZEOF = 283,
-     STATIC = 284,
-     STRUCT = 285,
-     SWITCH = 286,
-     TEMPLATE = 287,
-     TYPENAME = 288,
-     TYPEDEF = 289,
-     UNSIGNED = 290,
-     VOID = 291,
-     WHILE = 292,
-     CLASS = 293,
-     NEW = 294,
-     DELETE = 295,
-     PUBLIC = 296,
-     PRIVATE = 297,
-     PROTECTED = 298,
-     UNTIL = 299,
-     ENUM = 300,
-     UNION = 301,
-     AUTO = 302,
-     REGISTER = 303,
-     VOLATILE = 304,
-     THIS = 305,
-     IDENTIFIER = 306,
-     TYPE_NAME = 307,
-     INTEGER_LITERAL = 308,
-     FLOAT_LITERAL = 309,
-     EXPONENT_NUMBER_LITERAL = 310,
-     HEXADECIMAL_LITERAL = 311,
-     BINARY_LITERAL = 312,
-     BOOLEAN_LITERAL = 313,
-     STRING_LITERAL = 314,
-     CHAR_LITERAL = 315,
-     PRINTF_FUNCTION = 316,
-     SCANF_FUNCTION = 317,
-     MALLOC_FUNCTION = 318,
-     CALLOC_FUNCTION = 319,
-     REALLOC_FUNCTION = 320,
-     FREE_FUNCTION = 321,
-     PP_INCLUDE = 322,
-     HEADER_NAME = 323,
-     PP_DEFINE = 324,
-     INC = 325,
-     DEC = 326,
-     PLUS = 327,
-     MINUS = 328,
-     STAR = 329,
-     SLASH = 330,
-     PERCENT = 331,
-     ADD_ASSIGN = 332,
-     SUB_ASSIGN = 333,
-     MUL_ASSIGN = 334,
-     DIV_ASSIGN = 335,
-     MOD_ASSIGN = 336,
-     ASSIGN = 337,
-     EQ = 338,
-     NE = 339,
-     LE = 340,
-     GE = 341,
-     LT = 342,
-     GT = 343,
-     ANDAND = 344,
-     OROR = 345,
-     NOT = 346,
-     SHL_ASSIGN = 347,
-     SHR_ASSIGN = 348,
-     SHL = 349,
-     SHR = 350,
-     AND_ASSIGN = 351,
-     OR_ASSIGN = 352,
-     XOR_ASSIGN = 353,
-     BITAND = 354,
-     BITOR = 355,
-     BITXOR = 356,
-     BITNOT = 357,
-     ARROW = 358,
-     SCOPE = 359,
-     SEMICOLON = 360,
-     COMMA = 361,
-     LEFT_PAREN = 362,
-     RIGHT_PAREN = 363,
-     LEFT_BRACE = 364,
-     RIGHT_BRACE = 365,
-     LEFT_BRACKET = 366,
-     RIGHT_BRACKET = 367,
-     COLON = 368,
-     QUESTION_MARK = 369,
-     HASH = 370,
-     DOT = 371,
-     ELLIPSIS = 372,
-     MALFORMED_DIRECTIVE = 373,
-     UNARY = 374,
-     UMINUS = 375,
-     LOWER_THAN_ELSE = 376
+     CONSTEXPR = 263,
+     CONTINUE = 264,
+     DEFAULT = 265,
+     DO = 266,
+     DOUBLE = 267,
+     ELSE = 268,
+     EXTERN = 269,
+     FLOAT = 270,
+     FOR = 271,
+     FRIEND = 272,
+     GOTO = 273,
+     IF = 274,
+     INLINE = 275,
+     INT = 276,
+     LONG = 277,
+     LONG_LONG = 278,
+     NULLPTR = 279,
+     OPERATOR = 280,
+     RETURN = 281,
+     SHORT = 282,
+     SIGNED = 283,
+     SIZEOF = 284,
+     STATIC = 285,
+     STRUCT = 286,
+     SWITCH = 287,
+     TEMPLATE = 288,
+     TYPENAME = 289,
+     TYPEDEF = 290,
+     UNSIGNED = 291,
+     VOID = 292,
+     WHILE = 293,
+     CLASS = 294,
+     NEW = 295,
+     DELETE = 296,
+     PUBLIC = 297,
+     PRIVATE = 298,
+     PROTECTED = 299,
+     UNTIL = 300,
+     ENUM = 301,
+     UNION = 302,
+     AUTO = 303,
+     REGISTER = 304,
+     VOLATILE = 305,
+     THIS = 306,
+     IDENTIFIER = 307,
+     TYPE_NAME = 308,
+     INTEGER_LITERAL = 309,
+     FLOAT_LITERAL = 310,
+     EXPONENT_NUMBER_LITERAL = 311,
+     HEXADECIMAL_LITERAL = 312,
+     BINARY_LITERAL = 313,
+     BOOLEAN_LITERAL = 314,
+     STRING_LITERAL = 315,
+     CHAR_LITERAL = 316,
+     PRINTF_FUNCTION = 317,
+     SCANF_FUNCTION = 318,
+     MALLOC_FUNCTION = 319,
+     CALLOC_FUNCTION = 320,
+     REALLOC_FUNCTION = 321,
+     FREE_FUNCTION = 322,
+     PP_INCLUDE = 323,
+     HEADER_NAME = 324,
+     PP_DEFINE = 325,
+     INC = 326,
+     DEC = 327,
+     PLUS = 328,
+     MINUS = 329,
+     STAR = 330,
+     SLASH = 331,
+     PERCENT = 332,
+     ADD_ASSIGN = 333,
+     SUB_ASSIGN = 334,
+     MUL_ASSIGN = 335,
+     DIV_ASSIGN = 336,
+     MOD_ASSIGN = 337,
+     ASSIGN = 338,
+     EQ = 339,
+     NE = 340,
+     LE = 341,
+     GE = 342,
+     LT = 343,
+     GT = 344,
+     ANDAND = 345,
+     OROR = 346,
+     NOT = 347,
+     SHL_ASSIGN = 348,
+     SHR_ASSIGN = 349,
+     SHL = 350,
+     SHR = 351,
+     AND_ASSIGN = 352,
+     OR_ASSIGN = 353,
+     XOR_ASSIGN = 354,
+     BITAND = 355,
+     BITOR = 356,
+     BITXOR = 357,
+     BITNOT = 358,
+     ARROW = 359,
+     SCOPE = 360,
+     SEMICOLON = 361,
+     COMMA = 362,
+     LEFT_PAREN = 363,
+     RIGHT_PAREN = 364,
+     LEFT_BRACE = 365,
+     RIGHT_BRACE = 366,
+     LEFT_BRACKET = 367,
+     RIGHT_BRACKET = 368,
+     COLON = 369,
+     QUESTION_MARK = 370,
+     HASH = 371,
+     DOT = 372,
+     ELLIPSIS = 373,
+     MALFORMED_DIRECTIVE = 374,
+     UNARY = 375,
+     UMINUS = 376,
+     LOWER_THAN_ELSE = 377
    };
 #endif
 /* Tokens.  */
@@ -166,120 +167,121 @@
 #define CASE 260
 #define CHAR 261
 #define CONST 262
-#define CONTINUE 263
-#define DEFAULT 264
-#define DO 265
-#define DOUBLE 266
-#define ELSE 267
-#define EXTERN 268
-#define FLOAT 269
-#define FOR 270
-#define FRIEND 271
-#define GOTO 272
-#define IF 273
-#define INLINE 274
-#define INT 275
-#define LONG 276
-#define LONG_LONG 277
-#define NULLPTR 278
-#define OPERATOR 279
-#define RETURN 280
-#define SHORT 281
-#define SIGNED 282
-#define SIZEOF 283
-#define STATIC 284
-#define STRUCT 285
-#define SWITCH 286
-#define TEMPLATE 287
-#define TYPENAME 288
-#define TYPEDEF 289
-#define UNSIGNED 290
-#define VOID 291
-#define WHILE 292
-#define CLASS 293
-#define NEW 294
-#define DELETE 295
-#define PUBLIC 296
-#define PRIVATE 297
-#define PROTECTED 298
-#define UNTIL 299
-#define ENUM 300
-#define UNION 301
-#define AUTO 302
-#define REGISTER 303
-#define VOLATILE 304
-#define THIS 305
-#define IDENTIFIER 306
-#define TYPE_NAME 307
-#define INTEGER_LITERAL 308
-#define FLOAT_LITERAL 309
-#define EXPONENT_NUMBER_LITERAL 310
-#define HEXADECIMAL_LITERAL 311
-#define BINARY_LITERAL 312
-#define BOOLEAN_LITERAL 313
-#define STRING_LITERAL 314
-#define CHAR_LITERAL 315
-#define PRINTF_FUNCTION 316
-#define SCANF_FUNCTION 317
-#define MALLOC_FUNCTION 318
-#define CALLOC_FUNCTION 319
-#define REALLOC_FUNCTION 320
-#define FREE_FUNCTION 321
-#define PP_INCLUDE 322
-#define HEADER_NAME 323
-#define PP_DEFINE 324
-#define INC 325
-#define DEC 326
-#define PLUS 327
-#define MINUS 328
-#define STAR 329
-#define SLASH 330
-#define PERCENT 331
-#define ADD_ASSIGN 332
-#define SUB_ASSIGN 333
-#define MUL_ASSIGN 334
-#define DIV_ASSIGN 335
-#define MOD_ASSIGN 336
-#define ASSIGN 337
-#define EQ 338
-#define NE 339
-#define LE 340
-#define GE 341
-#define LT 342
-#define GT 343
-#define ANDAND 344
-#define OROR 345
-#define NOT 346
-#define SHL_ASSIGN 347
-#define SHR_ASSIGN 348
-#define SHL 349
-#define SHR 350
-#define AND_ASSIGN 351
-#define OR_ASSIGN 352
-#define XOR_ASSIGN 353
-#define BITAND 354
-#define BITOR 355
-#define BITXOR 356
-#define BITNOT 357
-#define ARROW 358
-#define SCOPE 359
-#define SEMICOLON 360
-#define COMMA 361
-#define LEFT_PAREN 362
-#define RIGHT_PAREN 363
-#define LEFT_BRACE 364
-#define RIGHT_BRACE 365
-#define LEFT_BRACKET 366
-#define RIGHT_BRACKET 367
-#define COLON 368
-#define QUESTION_MARK 369
-#define HASH 370
-#define DOT 371
-#define ELLIPSIS 372
-#define MALFORMED_DIRECTIVE 373
-#define UNARY 374
-#define UMINUS 375
-#define LOWER_THAN_ELSE 376
+#define CONSTEXPR 263
+#define CONTINUE 264
+#define DEFAULT 265
+#define DO 266
+#define DOUBLE 267
+#define ELSE 268
+#define EXTERN 269
+#define FLOAT 270
+#define FOR 271
+#define FRIEND 272
+#define GOTO 273
+#define IF 274
+#define INLINE 275
+#define INT 276
+#define LONG 277
+#define LONG_LONG 278
+#define NULLPTR 279
+#define OPERATOR 280
+#define RETURN 281
+#define SHORT 282
+#define SIGNED 283
+#define SIZEOF 284
+#define STATIC 285
+#define STRUCT 286
+#define SWITCH 287
+#define TEMPLATE 288
+#define TYPENAME 289
+#define TYPEDEF 290
+#define UNSIGNED 291
+#define VOID 292
+#define WHILE 293
+#define CLASS 294
+#define NEW 295
+#define DELETE 296
+#define PUBLIC 297
+#define PRIVATE 298
+#define PROTECTED 299
+#define UNTIL 300
+#define ENUM 301
+#define UNION 302
+#define AUTO 303
+#define REGISTER 304
+#define VOLATILE 305
+#define THIS 306
+#define IDENTIFIER 307
+#define TYPE_NAME 308
+#define INTEGER_LITERAL 309
+#define FLOAT_LITERAL 310
+#define EXPONENT_NUMBER_LITERAL 311
+#define HEXADECIMAL_LITERAL 312
+#define BINARY_LITERAL 313
+#define BOOLEAN_LITERAL 314
+#define STRING_LITERAL 315
+#define CHAR_LITERAL 316
+#define PRINTF_FUNCTION 317
+#define SCANF_FUNCTION 318
+#define MALLOC_FUNCTION 319
+#define CALLOC_FUNCTION 320
+#define REALLOC_FUNCTION 321
+#define FREE_FUNCTION 322
+#define PP_INCLUDE 323
+#define HEADER_NAME 324
+#define PP_DEFINE 325
+#define INC 326
+#define DEC 327
+#define PLUS 328
+#define MINUS 329
+#define STAR 330
+#define SLASH 331
+#define PERCENT 332
+#define ADD_ASSIGN 333
+#define SUB_ASSIGN 334
+#define MUL_ASSIGN 335
+#define DIV_ASSIGN 336
+#define MOD_ASSIGN 337
+#define ASSIGN 338
+#define EQ 339
+#define NE 340
+#define LE 341
+#define GE 342
+#define LT 343
+#define GT 344
+#define ANDAND 345
+#define OROR 346
+#define NOT 347
+#define SHL_ASSIGN 348
+#define SHR_ASSIGN 349
+#define SHL 350
+#define SHR 351
+#define AND_ASSIGN 352
+#define OR_ASSIGN 353
+#define XOR_ASSIGN 354
+#define BITAND 355
+#define BITOR 356
+#define BITXOR 357
+#define BITNOT 358
+#define ARROW 359
+#define SCOPE 360
+#define SEMICOLON 361
+#define COMMA 362
+#define LEFT_PAREN 363
+#define RIGHT_PAREN 364
+#define LEFT_BRACE 365
+#define RIGHT_BRACE 366
+#define LEFT_BRACKET 367
+#define RIGHT_BRACKET 368
+#define COLON 369
+#define QUESTION_MARK 370
+#define HASH 371
+#define DOT 372
+#define ELLIPSIS 373
+#define MALFORMED_DIRECTIVE 374
+#define UNARY 375
+#define UMINUS 376
+#define LOWER_THAN_ELSE 377
 
 
 
@@ -289,7 +291,7 @@ typedef union YYSTYPE
 #line 37 "src/parser.y"
 { char* text; }
 /* Line 1529 of yacc.c.  */
-#line 293 "src/parser.tab.h"
+#line 295 "src/parser.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

@@ -108,6 +108,7 @@ INVALID_MULTI "/*"([^*]|\*+[^*/])*
 "case" { KEY(CASE); }
 "char" { KEY(CHAR); }
 "const" { KEY(CONST); }
+"constexpr" { KEY(CONSTEXPR); }
 "continue" { KEY(CONTINUE); }
 "default" { KEY(DEFAULT); }
 "do" { KEY(DO); }
