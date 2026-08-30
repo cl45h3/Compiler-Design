@@ -1,3 +1,4 @@
 ERROR: Invalid identifier (cannot start with a digit) at line 4, column 1
 Syntax Error at line 5, column 9: expected ';' after declaration
-Summary: 1 lexical error(s), 1 syntax error(s).
+Syntax Error at line 5, column 12: syntax error
+Summary: 1 lexical error(s), 2 syntax error(s).
