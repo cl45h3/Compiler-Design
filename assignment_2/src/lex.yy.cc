@@ -952,7 +952,16 @@ using std::string; using std::vector; using std::map; using std::set; using std:
 extern void reportSyntaxErrorAt(int line, int column, const char* message);
 
 int currentLineNumber = 1, currentColumn = 1, tokenStartLine = 1, tokenStartColumn = 1;
-#define YY_USER_ACTION { tokenStartLine=currentLineNumber; tokenStartColumn=currentColumn; for(int i=0;i<yyleng;i++){ if(yytext[i]=='\n'){currentLineNumber++;currentColumn=1;} else if(yytext[i]=='\t') currentColumn+=4; else currentColumn++; } }
+/* True only while Bison is looking at the INVALID_TOKEN produced for a
+ * malformed lexeme.  yyerror uses this to avoid turning one lexical error
+ * into a duplicate parser error before statement-level recovery takes over. */
+bool currentParserTokenIsLexicalError = false;
+#define YY_USER_ACTION { \
+    tokenStartLine=currentLineNumber; tokenStartColumn=currentColumn; \
+    yylloc.first_line=tokenStartLine; yylloc.first_column=tokenStartColumn; \
+    for(int i=0;i<yyleng;i++){ if(yytext[i]=='\n'){currentLineNumber++;currentColumn=1;} else if(yytext[i]=='\t') currentColumn+=4; else currentColumn++; } \
+    yylloc.last_line=currentLineNumber; yylloc.last_column=currentColumn-1; \
+}
 struct LexicalToken { string lexeme,type; LexicalToken(const string& a,const string& b):lexeme(a),type(b){} };
 struct LexicalError { string message; int lineNumber,column; LexicalError(const string& a,int b,int c):message(a),lineNumber(b),column(c){} };
 struct SymbolEntry { string name; int occurrences; };
@@ -969,12 +978,16 @@ void addKeyword(const char* n){ keywordTable[string(n)]++; }
 size_t lexicalErrorCount(){ return errorList.size(); }
 void printLexicalErrors(){ for(const auto& e:errorList) cout << e.message << " at line " << e.lineNumber << ", column " << e.column << endl; }
 void printTokenTable(){ cout << "=================================================================" << endl << "                    SYNTAX ANALYSIS TOKEN TABLE" << endl << "=================================================================" << endl; printf("%-20s %s\n","Token","Token_Type"); cout << "-----------------------------------------------------------------" << endl; for(const auto& t:tokenList) printf("%-20s %s\n",t.lexeme.c_str(),t.type.c_str()); cout << "-----------------------------------------------------------------" << endl << "Total tokens found: " << tokenList.size() << endl; }
-#define RET(display, code) do { addToken(display,yytext); yylval.text=strdup(yytext); return code; } while(0)
-#define KEY(code) do { addToken("KEYWORD",yytext); addKeyword(yytext); yylval.text=strdup(yytext); return code; } while(0)
-#line 975 "src/lex.yy.cc"
+#define RET(display, code) do { currentParserTokenIsLexicalError=false; addToken(display,yytext); yylval.text=strdup(yytext); return code; } while(0)
+#define KEY(code) do { currentParserTokenIsLexicalError=false; addToken("KEYWORD",yytext); addKeyword(yytext); yylval.text=strdup(yytext); return code; } while(0)
+/* Preserve Assignment 1's diagnostic, but give the parser one explicit bad
+ * token.  Its `error SEMICOLON` / `error RIGHT_BRACE` productions then skip
+ * only the damaged construct and parsing resumes afterwards. */
+#define LEXERR(message) do { currentParserTokenIsLexicalError=true; addError(yytext,message); yylval.text=strdup(yytext); return INVALID_TOKEN; } while(0)
+#line 988 "src/lex.yy.cc"
 #define YY_NO_INPUT 1
 
-#line 978 "src/lex.yy.cc"
+#line 991 "src/lex.yy.cc"
 
 #define INITIAL 0
 #define INCL 1
@@ -1194,9 +1207,9 @@ YY_DECL
 		}
 
 	{
-#line 87 "src/lexer.l"
+#line 100 "src/lexer.l"
 
-#line 1200 "src/lex.yy.cc"
+#line 1213 "src/lex.yy.cc"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1256,754 +1269,756 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 88 "src/lexer.l"
+#line 101 "src/lexer.l"
 { addToken("PP_INCLUDE",yytext); yylval.text=strdup(yytext); BEGIN(INCL); return PP_INCLUDE; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 89 "src/lexer.l"
+#line 102 "src/lexer.l"
 ;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 90 "src/lexer.l"
+#line 103 "src/lexer.l"
 { addToken("HEADER_NAME",yytext); yylval.text=strdup(yytext); BEGIN(INITIAL); return HEADER_NAME; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 91 "src/lexer.l"
+#line 104 "src/lexer.l"
 { addToken("HEADER_NAME",yytext); yylval.text=strdup(yytext); BEGIN(INITIAL); return HEADER_NAME; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 92 "src/lexer.l"
-{ addError(yytext,"Malformed include directive"); BEGIN(INITIAL); }
+#line 105 "src/lexer.l"
+{ BEGIN(INITIAL); LEXERR("Malformed include directive"); }
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 93 "src/lexer.l"
+#line 106 "src/lexer.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
-/* A non-line-start #include becomes one recovery token; BADPP skips its line. */
+/* A non-line-start #include is structurally invalid, not a malformed
+    lexeme.  Return one token so the grammar reports exactly one syntax
+    diagnostic; BADPP then skips the rest of that directive line. */
 case 7:
 *yy_cp = (yy_hold_char); /* undo effects of setting up yytext */
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 95 "src/lexer.l"
-{ addToken("HASH",yytext); addError(yytext,"Misplaced preprocessor directive"); reportSyntaxErrorAt(tokenStartLine,tokenStartColumn,"preprocessor directive must begin a line"); yylval.text=strdup(yytext); BEGIN(BADPP); return MALFORMED_DIRECTIVE; }
+#line 110 "src/lexer.l"
+{ currentParserTokenIsLexicalError=false; addToken("HASH",yytext); yylval.text=strdup(yytext); BEGIN(BADPP); return MALFORMED_DIRECTIVE; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 96 "src/lexer.l"
+#line 111 "src/lexer.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 97 "src/lexer.l"
+#line 112 "src/lexer.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 98 "src/lexer.l"
+#line 113 "src/lexer.l"
 { RET("PP_DEFINE",PP_DEFINE); }
 	YY_BREAK
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 99 "src/lexer.l"
-{ addError(yytext,"Unterminated multi-line comment"); }
+#line 114 "src/lexer.l"
+{ LEXERR("Unterminated multi-line comment"); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 100 "src/lexer.l"
+#line 115 "src/lexer.l"
 ;
 	YY_BREAK
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 101 "src/lexer.l"
+#line 116 "src/lexer.l"
 ;
 	YY_BREAK
 case 14:
 /* rule 14 can match eol */
 YY_RULE_SETUP
-#line 102 "src/lexer.l"
+#line 117 "src/lexer.l"
 ;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 103 "src/lexer.l"
+#line 118 "src/lexer.l"
 ;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 104 "src/lexer.l"
+#line 119 "src/lexer.l"
 ;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 106 "src/lexer.l"
+#line 121 "src/lexer.l"
 { KEY(BOOL); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 107 "src/lexer.l"
+#line 122 "src/lexer.l"
 { KEY(BREAK); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 108 "src/lexer.l"
+#line 123 "src/lexer.l"
 { KEY(CASE); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 109 "src/lexer.l"
+#line 124 "src/lexer.l"
 { KEY(CHAR); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 110 "src/lexer.l"
+#line 125 "src/lexer.l"
 { KEY(CONST); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 111 "src/lexer.l"
+#line 126 "src/lexer.l"
 { KEY(CONSTEXPR); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 112 "src/lexer.l"
+#line 127 "src/lexer.l"
 { KEY(CONTINUE); }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 113 "src/lexer.l"
+#line 128 "src/lexer.l"
 { KEY(DEFAULT); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 114 "src/lexer.l"
+#line 129 "src/lexer.l"
 { KEY(DO); }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 115 "src/lexer.l"
+#line 130 "src/lexer.l"
 { KEY(DOUBLE); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 116 "src/lexer.l"
+#line 131 "src/lexer.l"
 { KEY(ELSE); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 117 "src/lexer.l"
+#line 132 "src/lexer.l"
 { KEY(EXTERN); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 118 "src/lexer.l"
+#line 133 "src/lexer.l"
 { KEY(FLOAT); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 119 "src/lexer.l"
+#line 134 "src/lexer.l"
 { KEY(FOR); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 120 "src/lexer.l"
+#line 135 "src/lexer.l"
 { KEY(FRIEND); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 121 "src/lexer.l"
+#line 136 "src/lexer.l"
 { KEY(GOTO); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 122 "src/lexer.l"
+#line 137 "src/lexer.l"
 { KEY(IF); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 123 "src/lexer.l"
+#line 138 "src/lexer.l"
 { KEY(INLINE); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 124 "src/lexer.l"
+#line 139 "src/lexer.l"
 { KEY(INT); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 125 "src/lexer.l"
+#line 140 "src/lexer.l"
 { KEY(LONG_LONG); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 126 "src/lexer.l"
+#line 141 "src/lexer.l"
 { KEY(LONG); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 127 "src/lexer.l"
+#line 142 "src/lexer.l"
 { KEY(NULLPTR); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 128 "src/lexer.l"
+#line 143 "src/lexer.l"
 { KEY(OPERATOR); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 129 "src/lexer.l"
+#line 144 "src/lexer.l"
 { KEY(RETURN); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 130 "src/lexer.l"
+#line 145 "src/lexer.l"
 { KEY(SHORT); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 131 "src/lexer.l"
+#line 146 "src/lexer.l"
 { KEY(SIGNED); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 132 "src/lexer.l"
+#line 147 "src/lexer.l"
 { KEY(SIZEOF); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 133 "src/lexer.l"
+#line 148 "src/lexer.l"
 { KEY(STATIC); }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 134 "src/lexer.l"
+#line 149 "src/lexer.l"
 { KEY(STRUCT); }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 135 "src/lexer.l"
+#line 150 "src/lexer.l"
 { KEY(SWITCH); }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 136 "src/lexer.l"
+#line 151 "src/lexer.l"
 { KEY(TEMPLATE); }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 137 "src/lexer.l"
+#line 152 "src/lexer.l"
 { KEY(TYPENAME); }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 138 "src/lexer.l"
+#line 153 "src/lexer.l"
 { KEY(TYPEDEF); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 139 "src/lexer.l"
+#line 154 "src/lexer.l"
 { KEY(UNSIGNED); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 140 "src/lexer.l"
+#line 155 "src/lexer.l"
 { KEY(VOID); }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 141 "src/lexer.l"
+#line 156 "src/lexer.l"
 { KEY(WHILE); }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 142 "src/lexer.l"
+#line 157 "src/lexer.l"
 { KEY(CLASS); }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 143 "src/lexer.l"
+#line 158 "src/lexer.l"
 { KEY(NEW); }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 144 "src/lexer.l"
+#line 159 "src/lexer.l"
 { KEY(DELETE); }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 145 "src/lexer.l"
+#line 160 "src/lexer.l"
 { KEY(PUBLIC); }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 146 "src/lexer.l"
+#line 161 "src/lexer.l"
 { KEY(PRIVATE); }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 147 "src/lexer.l"
+#line 162 "src/lexer.l"
 { KEY(PROTECTED); }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 148 "src/lexer.l"
+#line 163 "src/lexer.l"
 { KEY(UNTIL); }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 149 "src/lexer.l"
+#line 164 "src/lexer.l"
 { KEY(ENUM); }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 150 "src/lexer.l"
+#line 165 "src/lexer.l"
 { KEY(UNION); }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 151 "src/lexer.l"
+#line 166 "src/lexer.l"
 { KEY(AUTO); }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 152 "src/lexer.l"
+#line 167 "src/lexer.l"
 { KEY(REGISTER); }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 153 "src/lexer.l"
+#line 168 "src/lexer.l"
 { KEY(VOLATILE); }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 154 "src/lexer.l"
+#line 169 "src/lexer.l"
 { KEY(THIS); }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 156 "src/lexer.l"
+#line 171 "src/lexer.l"
 { RET("PRINTF_FUNCTION",PRINTF_FUNCTION); }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 157 "src/lexer.l"
+#line 172 "src/lexer.l"
 { RET("SCANF_FUNCTION",SCANF_FUNCTION); }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 158 "src/lexer.l"
+#line 173 "src/lexer.l"
 { RET("MALLOC_FUNCTION",MALLOC_FUNCTION); }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 159 "src/lexer.l"
+#line 174 "src/lexer.l"
 { RET("CALLOC_FUNCTION",CALLOC_FUNCTION); }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 160 "src/lexer.l"
+#line 175 "src/lexer.l"
 { RET("REALLOC_FUNCTION",REALLOC_FUNCTION); }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 161 "src/lexer.l"
+#line 176 "src/lexer.l"
 { RET("FREE_FUNCTION",FREE_FUNCTION); }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 163 "src/lexer.l"
+#line 178 "src/lexer.l"
 { RET("OPERATOR",INC); }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 164 "src/lexer.l"
+#line 179 "src/lexer.l"
 { RET("OPERATOR",DEC); }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 165 "src/lexer.l"
+#line 180 "src/lexer.l"
 { RET("OPERATOR",ADD_ASSIGN); }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 166 "src/lexer.l"
+#line 181 "src/lexer.l"
 { RET("OPERATOR",SUB_ASSIGN); }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 167 "src/lexer.l"
+#line 182 "src/lexer.l"
 { RET("OPERATOR",MUL_ASSIGN); }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 168 "src/lexer.l"
+#line 183 "src/lexer.l"
 { RET("OPERATOR",DIV_ASSIGN); }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 169 "src/lexer.l"
+#line 184 "src/lexer.l"
 { RET("OPERATOR",MOD_ASSIGN); }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 170 "src/lexer.l"
+#line 185 "src/lexer.l"
 { RET("OPERATOR",SHL_ASSIGN); }
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 171 "src/lexer.l"
+#line 186 "src/lexer.l"
 { RET("OPERATOR",SHR_ASSIGN); }
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 172 "src/lexer.l"
+#line 187 "src/lexer.l"
 { RET("OPERATOR",AND_ASSIGN); }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 173 "src/lexer.l"
+#line 188 "src/lexer.l"
 { RET("OPERATOR",OR_ASSIGN); }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 174 "src/lexer.l"
+#line 189 "src/lexer.l"
 { RET("OPERATOR",XOR_ASSIGN); }
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 175 "src/lexer.l"
+#line 190 "src/lexer.l"
 { RET("OPERATOR",EQ); }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 176 "src/lexer.l"
+#line 191 "src/lexer.l"
 { RET("OPERATOR",NE); }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 177 "src/lexer.l"
+#line 192 "src/lexer.l"
 { RET("OPERATOR",LE); }
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 178 "src/lexer.l"
+#line 193 "src/lexer.l"
 { RET("OPERATOR",GE); }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 179 "src/lexer.l"
+#line 194 "src/lexer.l"
 { RET("OPERATOR",ANDAND); }
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 180 "src/lexer.l"
+#line 195 "src/lexer.l"
 { RET("OPERATOR",OROR); }
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 181 "src/lexer.l"
+#line 196 "src/lexer.l"
 { RET("OPERATOR",SHL); }
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 182 "src/lexer.l"
+#line 197 "src/lexer.l"
 { RET("OPERATOR",SHR); }
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 183 "src/lexer.l"
+#line 198 "src/lexer.l"
 { RET("OPERATOR",ARROW); }
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
-#line 184 "src/lexer.l"
+#line 199 "src/lexer.l"
 { RET("OPERATOR",SCOPE); }
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 185 "src/lexer.l"
+#line 200 "src/lexer.l"
 { RET("OPERATOR",PLUS); }
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 186 "src/lexer.l"
+#line 201 "src/lexer.l"
 { RET("OPERATOR",MINUS); }
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
-#line 187 "src/lexer.l"
+#line 202 "src/lexer.l"
 { RET("OPERATOR",STAR); }
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 188 "src/lexer.l"
+#line 203 "src/lexer.l"
 { RET("OPERATOR",SLASH); }
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
-#line 189 "src/lexer.l"
+#line 204 "src/lexer.l"
 { RET("OPERATOR",PERCENT); }
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 190 "src/lexer.l"
+#line 205 "src/lexer.l"
 { RET("OPERATOR",ASSIGN); }
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
-#line 191 "src/lexer.l"
+#line 206 "src/lexer.l"
 { RET("OPERATOR",LT); }
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 192 "src/lexer.l"
+#line 207 "src/lexer.l"
 { RET("OPERATOR",GT); }
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 193 "src/lexer.l"
+#line 208 "src/lexer.l"
 { RET("OPERATOR",NOT); }
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
-#line 194 "src/lexer.l"
+#line 209 "src/lexer.l"
 { RET("OPERATOR",BITAND); }
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
-#line 195 "src/lexer.l"
+#line 210 "src/lexer.l"
 { RET("OPERATOR",BITOR); }
 	YY_BREAK
 case 105:
 YY_RULE_SETUP
-#line 196 "src/lexer.l"
+#line 211 "src/lexer.l"
 { RET("OPERATOR",BITXOR); }
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
-#line 197 "src/lexer.l"
+#line 212 "src/lexer.l"
 { RET("OPERATOR",BITNOT); }
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
-#line 199 "src/lexer.l"
+#line 214 "src/lexer.l"
 { RET("SEMICOLON",SEMICOLON); }
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
-#line 200 "src/lexer.l"
+#line 215 "src/lexer.l"
 { RET("COMMA",COMMA); }
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 201 "src/lexer.l"
+#line 216 "src/lexer.l"
 { RET("LEFT_PAREN",LEFT_PAREN); }
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
-#line 202 "src/lexer.l"
+#line 217 "src/lexer.l"
 { RET("RIGHT_PAREN",RIGHT_PAREN); }
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 203 "src/lexer.l"
+#line 218 "src/lexer.l"
 { RET("LEFT_BRACE",LEFT_BRACE); }
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 204 "src/lexer.l"
+#line 219 "src/lexer.l"
 { RET("RIGHT_BRACE",RIGHT_BRACE); }
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 205 "src/lexer.l"
+#line 220 "src/lexer.l"
 { RET("LEFT_BRACKET",LEFT_BRACKET); }
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-#line 206 "src/lexer.l"
+#line 221 "src/lexer.l"
 { RET("RIGHT_BRACKET",RIGHT_BRACKET); }
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
-#line 207 "src/lexer.l"
+#line 222 "src/lexer.l"
 { RET("COLON",COLON); }
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 208 "src/lexer.l"
+#line 223 "src/lexer.l"
 { RET("QUESTION_MARK",QUESTION_MARK); }
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 209 "src/lexer.l"
+#line 224 "src/lexer.l"
 { RET("HASH",HASH); }
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 211 "src/lexer.l"
+#line 226 "src/lexer.l"
 { RET("STRING_LITERAL",STRING_LITERAL); }
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 212 "src/lexer.l"
-{ addError(yytext,"Invalid escape sequence in string literal"); }
+#line 227 "src/lexer.l"
+{ LEXERR("Invalid escape sequence in string literal"); }
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
-#line 213 "src/lexer.l"
+#line 228 "src/lexer.l"
 { RET("CHAR_LITERAL",CHAR_LITERAL); }
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 214 "src/lexer.l"
-{ addError(yytext,"Invalid escape sequence in character literal"); }
+#line 229 "src/lexer.l"
+{ LEXERR("Invalid escape sequence in character literal"); }
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
-#line 215 "src/lexer.l"
-{ addError(yytext,"Empty character literal"); }
+#line 230 "src/lexer.l"
+{ LEXERR("Empty character literal"); }
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 216 "src/lexer.l"
-{ addError(yytext,"Multi-character literal"); }
+#line 231 "src/lexer.l"
+{ LEXERR("Multi-character literal"); }
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
-#line 217 "src/lexer.l"
-{ addError(yytext,"Unterminated string literal"); }
+#line 232 "src/lexer.l"
+{ LEXERR("Unterminated string literal"); }
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
-#line 218 "src/lexer.l"
-{ addError(yytext,"Unterminated character literal"); }
+#line 233 "src/lexer.l"
+{ LEXERR("Unterminated character literal"); }
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 219 "src/lexer.l"
-{ addError(yytext,"Multiple decimal points in float literal"); }
+#line 234 "src/lexer.l"
+{ LEXERR("Multiple decimal points in float literal"); }
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
-#line 220 "src/lexer.l"
-{ addError(yytext,"Multiple decimal points in float literal"); }
+#line 235 "src/lexer.l"
+{ LEXERR("Multiple decimal points in float literal"); }
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
-#line 221 "src/lexer.l"
-{ addError(yytext,"Multiple exponents in float literal"); }
+#line 236 "src/lexer.l"
+{ LEXERR("Multiple exponents in float literal"); }
 	YY_BREAK
 case 129:
 YY_RULE_SETUP
-#line 222 "src/lexer.l"
-{ addError(yytext,"Missing digits before exponent"); }
+#line 237 "src/lexer.l"
+{ LEXERR("Missing digits before exponent"); }
 	YY_BREAK
 case 130:
 YY_RULE_SETUP
-#line 223 "src/lexer.l"
-{ addError(yytext,"Incomplete floating-point exponent"); }
+#line 238 "src/lexer.l"
+{ LEXERR("Incomplete floating-point exponent"); }
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 224 "src/lexer.l"
-{ addError(yytext,"Invalid exponent in float literal"); }
+#line 239 "src/lexer.l"
+{ LEXERR("Invalid exponent in float literal"); }
 	YY_BREAK
 case 132:
 YY_RULE_SETUP
-#line 225 "src/lexer.l"
-{ addError(yytext,"Incomplete hexadecimal literal"); }
+#line 240 "src/lexer.l"
+{ LEXERR("Incomplete hexadecimal literal"); }
 	YY_BREAK
 case 133:
 YY_RULE_SETUP
-#line 226 "src/lexer.l"
-{ addError(yytext,"Invalid hexadecimal digit"); }
+#line 241 "src/lexer.l"
+{ LEXERR("Invalid hexadecimal digit"); }
 	YY_BREAK
 case 134:
 YY_RULE_SETUP
-#line 227 "src/lexer.l"
-{ addError(yytext,"Incomplete binary literal"); }
+#line 242 "src/lexer.l"
+{ LEXERR("Incomplete binary literal"); }
 	YY_BREAK
 case 135:
 YY_RULE_SETUP
-#line 228 "src/lexer.l"
-{ addError(yytext,"Invalid binary digit"); }
+#line 243 "src/lexer.l"
+{ LEXERR("Invalid binary digit"); }
 	YY_BREAK
 case 136:
 YY_RULE_SETUP
-#line 229 "src/lexer.l"
+#line 244 "src/lexer.l"
 { RET("HEXADECIMAL_LITERAL",HEXADECIMAL_LITERAL); }
 	YY_BREAK
 case 137:
 YY_RULE_SETUP
-#line 230 "src/lexer.l"
+#line 245 "src/lexer.l"
 { RET("BINARY_LITERAL",BINARY_LITERAL); }
 	YY_BREAK
 case 138:
 YY_RULE_SETUP
-#line 231 "src/lexer.l"
+#line 246 "src/lexer.l"
 { RET("EXPONENT_NUMBER_LITERAL",EXPONENT_NUMBER_LITERAL); }
 	YY_BREAK
 case 139:
 YY_RULE_SETUP
-#line 232 "src/lexer.l"
+#line 247 "src/lexer.l"
 { RET("FLOAT_LITERAL",FLOAT_LITERAL); }
 	YY_BREAK
 case 140:
 YY_RULE_SETUP
-#line 233 "src/lexer.l"
+#line 248 "src/lexer.l"
 { RET("INTEGER_LITERAL",INTEGER_LITERAL); }
 	YY_BREAK
 case 141:
 YY_RULE_SETUP
-#line 234 "src/lexer.l"
+#line 249 "src/lexer.l"
 { RET("BOOLEAN_LITERAL",BOOLEAN_LITERAL); }
 	YY_BREAK
 case 142:
 YY_RULE_SETUP
-#line 235 "src/lexer.l"
-{ addError(yytext,"Invalid suffix on floating-point literal"); }
+#line 250 "src/lexer.l"
+{ LEXERR("Invalid suffix on floating-point literal"); }
 	YY_BREAK
 case 143:
 YY_RULE_SETUP
-#line 236 "src/lexer.l"
+#line 251 "src/lexer.l"
 { RET("ELLIPSIS",ELLIPSIS); }
 	YY_BREAK
 case 144:
 YY_RULE_SETUP
-#line 237 "src/lexer.l"
+#line 252 "src/lexer.l"
 { RET("DOT",DOT); }
 	YY_BREAK
 case 145:
 YY_RULE_SETUP
-#line 238 "src/lexer.l"
-{ addToken("IDENTIFIER",yytext); addSymbol(yytext); yylval.text=strdup(yytext); return isKnownTypeName(yytext)?TYPE_NAME:IDENTIFIER; }
+#line 253 "src/lexer.l"
+{ currentParserTokenIsLexicalError=false; addToken("IDENTIFIER",yytext); addSymbol(yytext); yylval.text=strdup(yytext); return isKnownTypeName(yytext)?TYPE_NAME:IDENTIFIER; }
 	YY_BREAK
 case 146:
 YY_RULE_SETUP
-#line 239 "src/lexer.l"
-{ addError(yytext,"Invalid identifier (cannot start with a digit)"); }
+#line 254 "src/lexer.l"
+{ LEXERR("Invalid identifier (cannot start with a digit)"); }
 	YY_BREAK
 case 147:
 YY_RULE_SETUP
-#line 240 "src/lexer.l"
-{ addError(yytext,"Unrecognized character"); }
+#line 255 "src/lexer.l"
+{ LEXERR("Unrecognized character"); }
 	YY_BREAK
 case 148:
 YY_RULE_SETUP
-#line 241 "src/lexer.l"
+#line 256 "src/lexer.l"
 ECHO;
 	YY_BREAK
-#line 2007 "src/lex.yy.cc"
+#line 2022 "src/lex.yy.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(INCL):
 case YY_STATE_EOF(BADPP):
@@ -2976,6 +2991,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 241 "src/lexer.l"
+#line 256 "src/lexer.l"
 
 

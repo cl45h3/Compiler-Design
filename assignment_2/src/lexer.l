@@ -14,7 +14,16 @@ using std::string; using std::vector; using std::map; using std::set; using std:
 extern void reportSyntaxErrorAt(int line, int column, const char* message);
 
 int currentLineNumber = 1, currentColumn = 1, tokenStartLine = 1, tokenStartColumn = 1;
-#define YY_USER_ACTION { tokenStartLine=currentLineNumber; tokenStartColumn=currentColumn; for(int i=0;i<yyleng;i++){ if(yytext[i]=='\n'){currentLineNumber++;currentColumn=1;} else if(yytext[i]=='\t') currentColumn+=4; else currentColumn++; } }
+/* True only while Bison is looking at the INVALID_TOKEN produced for a
+ * malformed lexeme.  yyerror uses this to avoid turning one lexical error
+ * into a duplicate parser error before statement-level recovery takes over. */
+bool currentParserTokenIsLexicalError = false;
+#define YY_USER_ACTION { \
+    tokenStartLine=currentLineNumber; tokenStartColumn=currentColumn; \
+    yylloc.first_line=tokenStartLine; yylloc.first_column=tokenStartColumn; \
+    for(int i=0;i<yyleng;i++){ if(yytext[i]=='\n'){currentLineNumber++;currentColumn=1;} else if(yytext[i]=='\t') currentColumn+=4; else currentColumn++; } \
+    yylloc.last_line=currentLineNumber; yylloc.last_column=currentColumn-1; \
+}
 struct LexicalToken { string lexeme,type; LexicalToken(const string& a,const string& b):lexeme(a),type(b){} };
 struct LexicalError { string message; int lineNumber,column; LexicalError(const string& a,int b,int c):message(a),lineNumber(b),column(c){} };
 struct SymbolEntry { string name; int occurrences; };
@@ -31,8 +40,12 @@ void addKeyword(const char* n){ keywordTable[string(n)]++; }
 size_t lexicalErrorCount(){ return errorList.size(); }
 void printLexicalErrors(){ for(const auto& e:errorList) cout << e.message << " at line " << e.lineNumber << ", column " << e.column << endl; }
 void printTokenTable(){ cout << "=================================================================" << endl << "                    SYNTAX ANALYSIS TOKEN TABLE" << endl << "=================================================================" << endl; printf("%-20s %s\n","Token","Token_Type"); cout << "-----------------------------------------------------------------" << endl; for(const auto& t:tokenList) printf("%-20s %s\n",t.lexeme.c_str(),t.type.c_str()); cout << "-----------------------------------------------------------------" << endl << "Total tokens found: " << tokenList.size() << endl; }
-#define RET(display, code) do { addToken(display,yytext); yylval.text=strdup(yytext); return code; } while(0)
-#define KEY(code) do { addToken("KEYWORD",yytext); addKeyword(yytext); yylval.text=strdup(yytext); return code; } while(0)
+#define RET(display, code) do { currentParserTokenIsLexicalError=false; addToken(display,yytext); yylval.text=strdup(yytext); return code; } while(0)
+#define KEY(code) do { currentParserTokenIsLexicalError=false; addToken("KEYWORD",yytext); addKeyword(yytext); yylval.text=strdup(yytext); return code; } while(0)
+/* Preserve Assignment 1's diagnostic, but give the parser one explicit bad
+ * token.  Its `error SEMICOLON` / `error RIGHT_BRACE` productions then skip
+ * only the damaged construct and parsing resumes afterwards. */
+#define LEXERR(message) do { currentParserTokenIsLexicalError=true; addError(yytext,message); yylval.text=strdup(yytext); return INVALID_TOKEN; } while(0)
 %}
 %option noyywrap nounput noinput
 %x INCL BADPP
@@ -89,14 +102,16 @@ INVALID_MULTI "/*"([^*]|\*+[^*/])*
 <INCL>[ \t]+ ;
 <INCL>"<"[^>\n]+">" { addToken("HEADER_NAME",yytext); yylval.text=strdup(yytext); BEGIN(INITIAL); return HEADER_NAME; }
 <INCL>\"[^\"\n]+\" { addToken("HEADER_NAME",yytext); yylval.text=strdup(yytext); BEGIN(INITIAL); return HEADER_NAME; }
-<INCL>[^ \t\n][^\n]* { addError(yytext,"Malformed include directive"); BEGIN(INITIAL); }
+<INCL>[^ \t\n][^\n]* { BEGIN(INITIAL); LEXERR("Malformed include directive"); }
 <INCL>\n { BEGIN(INITIAL); }
- /* A non-line-start #include becomes one recovery token; BADPP skips its line. */
-"#"/[ \t]*"include" { addToken("HASH",yytext); addError(yytext,"Misplaced preprocessor directive"); reportSyntaxErrorAt(tokenStartLine,tokenStartColumn,"preprocessor directive must begin a line"); yylval.text=strdup(yytext); BEGIN(BADPP); return MALFORMED_DIRECTIVE; }
+ /* A non-line-start #include is structurally invalid, not a malformed
+    lexeme.  Return one token so the grammar reports exactly one syntax
+    diagnostic; BADPP then skips the rest of that directive line. */
+"#"/[ \t]*"include" { currentParserTokenIsLexicalError=false; addToken("HASH",yytext); yylval.text=strdup(yytext); BEGIN(BADPP); return MALFORMED_DIRECTIVE; }
 <BADPP>[^\n]* { BEGIN(INITIAL); }
 <BADPP>\n { BEGIN(INITIAL); }
 ^[ \t]*"#"[ \t]*"define" { RET("PP_DEFINE",PP_DEFINE); }
-{INVALID_MULTI} { addError(yytext,"Unterminated multi-line comment"); }
+{INVALID_MULTI} { LEXERR("Unterminated multi-line comment"); }
 {COMMENT_SINGLE} ;
 {COMMENT_MULTI} ;
 {NEWLINE} ;
@@ -209,33 +224,33 @@ INVALID_MULTI "/*"([^*]|\*+[^*/])*
 "#" { RET("HASH",HASH); }
 
 {STRING_LITERAL} { RET("STRING_LITERAL",STRING_LITERAL); }
-{INVALID_ESCAPE_STRING} { addError(yytext,"Invalid escape sequence in string literal"); }
+{INVALID_ESCAPE_STRING} { LEXERR("Invalid escape sequence in string literal"); }
 {CHAR_LITERAL} { RET("CHAR_LITERAL",CHAR_LITERAL); }
-{INVALID_ESCAPE_CHAR} { addError(yytext,"Invalid escape sequence in character literal"); }
-{EMPTY_CHAR_LITERAL} { addError(yytext,"Empty character literal"); }
-{MULTI_CHAR_LITERAL} { addError(yytext,"Multi-character literal"); }
-{UNTERMINATED_STRING} { addError(yytext,"Unterminated string literal"); }
-{UNTERMINATED_CHAR} { addError(yytext,"Unterminated character literal"); }
-{INVALID_FLOAT_MULTI_DOT} { addError(yytext,"Multiple decimal points in float literal"); }
-{INVALID_FLOAT_MULTI_DOT2} { addError(yytext,"Multiple decimal points in float literal"); }
-{INVALID_FLOAT_MULTI_EXP} { addError(yytext,"Multiple exponents in float literal"); }
-{INVALID_FLOAT1} { addError(yytext,"Missing digits before exponent"); }
-{INVALID_FLOAT_INCOMPLETE} { addError(yytext,"Incomplete floating-point exponent"); }
-{INVALID_FLOAT_BAD_EXP} { addError(yytext,"Invalid exponent in float literal"); }
-{INVALID_HEX_INCOMPLETE} { addError(yytext,"Incomplete hexadecimal literal"); }
-{INVALID_HEX} { addError(yytext,"Invalid hexadecimal digit"); }
-{INVALID_BIN_INCOMPLETE} { addError(yytext,"Incomplete binary literal"); }
-{INVALID_BIN} { addError(yytext,"Invalid binary digit"); }
+{INVALID_ESCAPE_CHAR} { LEXERR("Invalid escape sequence in character literal"); }
+{EMPTY_CHAR_LITERAL} { LEXERR("Empty character literal"); }
+{MULTI_CHAR_LITERAL} { LEXERR("Multi-character literal"); }
+{UNTERMINATED_STRING} { LEXERR("Unterminated string literal"); }
+{UNTERMINATED_CHAR} { LEXERR("Unterminated character literal"); }
+{INVALID_FLOAT_MULTI_DOT} { LEXERR("Multiple decimal points in float literal"); }
+{INVALID_FLOAT_MULTI_DOT2} { LEXERR("Multiple decimal points in float literal"); }
+{INVALID_FLOAT_MULTI_EXP} { LEXERR("Multiple exponents in float literal"); }
+{INVALID_FLOAT1} { LEXERR("Missing digits before exponent"); }
+{INVALID_FLOAT_INCOMPLETE} { LEXERR("Incomplete floating-point exponent"); }
+{INVALID_FLOAT_BAD_EXP} { LEXERR("Invalid exponent in float literal"); }
+{INVALID_HEX_INCOMPLETE} { LEXERR("Incomplete hexadecimal literal"); }
+{INVALID_HEX} { LEXERR("Invalid hexadecimal digit"); }
+{INVALID_BIN_INCOMPLETE} { LEXERR("Incomplete binary literal"); }
+{INVALID_BIN} { LEXERR("Invalid binary digit"); }
 {HEX_LITERAL} { RET("HEXADECIMAL_LITERAL",HEXADECIMAL_LITERAL); }
 {BIN_LITERAL} { RET("BINARY_LITERAL",BINARY_LITERAL); }
 {EXPONENT_NUMBER} { RET("EXPONENT_NUMBER_LITERAL",EXPONENT_NUMBER_LITERAL); }
 {FLOAT_LITERAL} { RET("FLOAT_LITERAL",FLOAT_LITERAL); }
 {INTEGER_LITERAL} { RET("INTEGER_LITERAL",INTEGER_LITERAL); }
 {BOOLEAN_LITERAL} { RET("BOOLEAN_LITERAL",BOOLEAN_LITERAL); }
-{INVALID_FLOAT_SUFFIX} { addError(yytext,"Invalid suffix on floating-point literal"); }
+{INVALID_FLOAT_SUFFIX} { LEXERR("Invalid suffix on floating-point literal"); }
 "..." { RET("ELLIPSIS",ELLIPSIS); }
 "." { RET("DOT",DOT); }
-{IDENTIFIER} { addToken("IDENTIFIER",yytext); addSymbol(yytext); yylval.text=strdup(yytext); return isKnownTypeName(yytext)?TYPE_NAME:IDENTIFIER; }
-{INVALID_IDENTIFIER} { addError(yytext,"Invalid identifier (cannot start with a digit)"); }
-. { addError(yytext,"Unrecognized character"); }
+{IDENTIFIER} { currentParserTokenIsLexicalError=false; addToken("IDENTIFIER",yytext); addSymbol(yytext); yylval.text=strdup(yytext); return isKnownTypeName(yytext)?TYPE_NAME:IDENTIFIER; }
+{INVALID_IDENTIFIER} { LEXERR("Invalid identifier (cannot start with a digit)"); }
+. { LEXERR("Unrecognized character"); }
 %%

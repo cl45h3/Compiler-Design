@@ -156,9 +156,10 @@
      DOT = 372,
      ELLIPSIS = 373,
      MALFORMED_DIRECTIVE = 374,
-     UNARY = 375,
-     UMINUS = 376,
-     LOWER_THAN_ELSE = 377
+     INVALID_TOKEN = 375,
+     UNARY = 376,
+     UMINUS = 377,
+     LOWER_THAN_ELSE = 378
    };
 #endif
 /* Tokens.  */
@@ -279,19 +280,20 @@
 #define DOT 372
 #define ELLIPSIS 373
 #define MALFORMED_DIRECTIVE 374
-#define UNARY 375
-#define UMINUS 376
-#define LOWER_THAN_ELSE 377
+#define INVALID_TOKEN 375
+#define UNARY 376
+#define UMINUS 377
+#define LOWER_THAN_ELSE 378
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 37 "src/parser.y"
+#line 42 "src/parser.y"
 { char* text; }
 /* Line 1529 of yacc.c.  */
-#line 295 "src/parser.tab.h"
+#line 297 "src/parser.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -300,3 +302,17 @@ typedef union YYSTYPE
 
 extern YYSTYPE yylval;
 
+#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
+typedef struct YYLTYPE
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+} YYLTYPE;
+# define yyltype YYLTYPE /* obsolescent; will be withdrawn */
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
+#endif
+
+extern YYLTYPE yylloc;

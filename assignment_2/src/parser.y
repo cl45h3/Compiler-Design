@@ -13,6 +13,7 @@ using std::cout; using std::cerr; using std::endl; using std::string;
 
 struct SyntaxError { string message; int lineNumber; int column; };
 extern int tokenStartLine, tokenStartColumn, currentLineNumber;
+extern bool currentParserTokenIsLexicalError;
 extern void registerTypeName(const char* name);
 extern bool isKnownTypeName(const char* name);
 extern void printTokenTable();
@@ -24,6 +25,10 @@ void yyerror(const char* message);
 
 std::vector<SyntaxError> syntaxErrorList;
 static void addSyntaxError(const char* message) {
+    /* The lexer has already issued the useful diagnostic for INVALID_TOKEN.
+       Suppress only this immediate parser cascade; recovery still advances to
+       the statement/block boundary, so later independent errors are kept. */
+    if (currentParserTokenIsLexicalError) return;
     /* Bison can call yyerror more than once at the same recovery point. */
     if (!syntaxErrorList.empty() && syntaxErrorList.back().lineNumber == tokenStartLine &&
         syntaxErrorList.back().column == tokenStartColumn) return;
@@ -36,17 +41,18 @@ void reportSyntaxErrorAt(int line, int column, const char* message) {
 
 %union { char* text; }
 %debug
+%locations
 /* Audited with bison -v: C/C++ declarator/expression lookahead ambiguities. */
-%expect 43
+%expect 62
 
 %token <text> BOOL BREAK CASE CHAR CONST CONSTEXPR CONTINUE DEFAULT DO DOUBLE ELSE EXTERN FLOAT FOR FRIEND GOTO IF INLINE INT LONG LONG_LONG NULLPTR OPERATOR RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TEMPLATE TYPENAME TYPEDEF UNSIGNED VOID WHILE CLASS NEW DELETE PUBLIC PRIVATE PROTECTED UNTIL ENUM UNION AUTO REGISTER VOLATILE THIS
 %token <text> IDENTIFIER TYPE_NAME INTEGER_LITERAL FLOAT_LITERAL EXPONENT_NUMBER_LITERAL HEXADECIMAL_LITERAL BINARY_LITERAL BOOLEAN_LITERAL STRING_LITERAL CHAR_LITERAL
 %token <text> PRINTF_FUNCTION SCANF_FUNCTION MALLOC_FUNCTION CALLOC_FUNCTION REALLOC_FUNCTION FREE_FUNCTION
 %token <text> PP_INCLUDE HEADER_NAME PP_DEFINE
 %token <text> INC DEC PLUS MINUS STAR SLASH PERCENT ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ASSIGN EQ NE LE GE LT GT ANDAND OROR NOT SHL_ASSIGN SHR_ASSIGN SHL SHR AND_ASSIGN OR_ASSIGN XOR_ASSIGN BITAND BITOR BITXOR BITNOT ARROW SCOPE
-%token <text> SEMICOLON COMMA LEFT_PAREN RIGHT_PAREN LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET COLON QUESTION_MARK HASH DOT ELLIPSIS MALFORMED_DIRECTIVE
+%token <text> SEMICOLON COMMA LEFT_PAREN RIGHT_PAREN LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET COLON QUESTION_MARK HASH DOT ELLIPSIS MALFORMED_DIRECTIVE INVALID_TOKEN
 
-%type <text> declarator direct_declarator function_pointer_declarator function_declarator function_direct_declarator named_identifier qualified_name class_head struct_head enum_head union_head
+%type <text> declarator direct_declarator function_pointer_declarator function_declarator function_direct_declarator named_identifier tag_identifier qualified_name class_head struct_head enum_head union_head
 
 %right ASSIGN ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN AND_ASSIGN OR_ASSIGN XOR_ASSIGN SHL_ASSIGN SHR_ASSIGN
 %right QUESTION_MARK COLON
@@ -86,6 +92,10 @@ external_declaration
     | enum_declaration
     | union_declaration
     | template_declaration
+    /* At file scope, an invalid expression statement can synchronize at its
+       own semicolon. Without this rule, recovery could consume the closing
+       brace of the next class/struct definition. */
+    | error SEMICOLON { yyerrok; }
     /* A missing function parameter list ends at its closing brace. This keeps
        recovery local instead of eating a later function's return statement. */
     | error RIGHT_BRACE { yyerrok; }
@@ -96,6 +106,8 @@ preprocessor_directive
     | PP_DEFINE IDENTIFIER constant_expression
     | PP_DEFINE IDENTIFIER
     | IDENTIFIER MALFORMED_DIRECTIVE
+      { reportSyntaxErrorAt(@2.first_line, @2.first_column,
+                            "preprocessor directive must begin a line"); }
     ;
 
 template_declaration
@@ -108,21 +120,26 @@ template_head
 
 /* Register tags as soon as their heads reduce, before member tokens scan. */
 class_head
-    : CLASS named_identifier { registerTypeName($2); $$ = $2; }
+    : CLASS tag_identifier { registerTypeName($2); $$ = $2; }
     ;
 struct_head
-    : STRUCT named_identifier { registerTypeName($2); $$ = $2; }
+    : STRUCT tag_identifier { registerTypeName($2); $$ = $2; }
     ;
 enum_head
-    : ENUM named_identifier { registerTypeName($2); $$ = $2; }
+    : ENUM tag_identifier { registerTypeName($2); $$ = $2; }
     ;
 union_head
-    : UNION named_identifier { registerTypeName($2); $$ = $2; }
+    : UNION tag_identifier { registerTypeName($2); $$ = $2; }
     ;
 
 class_declaration
     : class_head inheritance_opt LEFT_BRACE member_list RIGHT_BRACE SEMICOLON
     | class_head inheritance_opt LEFT_BRACE member_list RIGHT_BRACE
+      { reportSyntaxErrorAt(@5.first_line, @5.last_column + 1, "expected ';' after class definition"); }
+    /* Deliberately invalid C++ form, retained solely as a local recovery
+       boundary.  This prevents `class A() {}` from consuming declarations
+       that follow its terminating semicolon. */
+    | class_head LEFT_PAREN error RIGHT_PAREN LEFT_BRACE member_list RIGHT_BRACE SEMICOLON { yyerrok; }
     ;
 inheritance_opt
     : /* empty */
@@ -163,14 +180,19 @@ constructor_definition
 struct_declaration
     : struct_head LEFT_BRACE member_list RIGHT_BRACE SEMICOLON
     | struct_head LEFT_BRACE member_list RIGHT_BRACE
+      { reportSyntaxErrorAt(@4.first_line, @4.last_column + 1, "expected ';' after struct definition"); }
+    /* Same local recovery for invalid `struct A() {}` heads. */
+    | struct_head LEFT_PAREN error RIGHT_PAREN LEFT_BRACE member_list RIGHT_BRACE SEMICOLON { yyerrok; }
     ;
 union_declaration
     : union_head LEFT_BRACE member_list RIGHT_BRACE SEMICOLON
     | union_head LEFT_BRACE member_list RIGHT_BRACE
+      { reportSyntaxErrorAt(@4.first_line, @4.last_column + 1, "expected ';' after union definition"); }
     ;
 enum_declaration
     : enum_head LEFT_BRACE enumerator_list_opt RIGHT_BRACE SEMICOLON
     | enum_head LEFT_BRACE enumerator_list_opt RIGHT_BRACE
+      { reportSyntaxErrorAt(@4.first_line, @4.last_column + 1, "expected ';' after enum definition"); }
     ;
 enumerator_list_opt
     : /* empty */ | enumerator_list
@@ -188,6 +210,11 @@ function_definition
 
 declaration
     : declaration_specifiers init_declarator_list SEMICOLON
+    /* If another declaration or block boundary follows, reduce the incomplete
+       declaration locally. This reports each missing semicolon instead of
+       letting `error SEMICOLON` swallow several declarations at once. */
+    | declaration_specifiers init_declarator_list
+      { reportSyntaxErrorAt(@2.last_line, @2.last_column + 1, "expected ';' after declaration"); }
     ;
 function_declaration
     : declaration_specifiers function_declarator SEMICOLON
@@ -237,9 +264,9 @@ type_specifier
     : VOID | CHAR | INT | FLOAT | DOUBLE | BOOL | AUTO
     | SHORT | LONG | LONG_LONG | SIGNED | UNSIGNED
     | TYPE_NAME
-    | STRUCT named_identifier | STRUCT TYPE_NAME
-    | ENUM named_identifier | ENUM TYPE_NAME
-    | UNION named_identifier | UNION TYPE_NAME
+    | STRUCT tag_identifier
+    | ENUM tag_identifier
+    | UNION tag_identifier
     | TYPENAME qualified_name
     ;
 
@@ -295,12 +322,19 @@ direct_declarator
     : qualified_name { $$ = $1; }
     | OPERATOR overload_operator { $$ = $1; }
     | LEFT_PAREN declarator RIGHT_PAREN { $$ = $2; }
+    /* Array-bound expressions are optional in the C++ declarator grammar.
+       Whether the resulting unknown-bound/incomplete array is permitted is a
+       later type/semantic constraint, deliberately outside this project. */
     | direct_declarator LEFT_BRACKET constant_expression_opt RIGHT_BRACKET { $$ = $1; }
     ;
 /* Kept separate from ordinary declarators so `Type object(args)` is direct
    initialization rather than an attempted parameter declaration. */
 function_pointer_declarator
     : LEFT_PAREN pointer named_identifier RIGHT_PAREN LEFT_PAREN parameter_list_opt RIGHT_PAREN { $$ = $3; }
+    ;
+constant_expression_opt
+    : /* empty */
+    | constant_expression
     ;
 /* Unlike a variable declarator, a function definition must contain (...). */
 function_declarator
@@ -321,9 +355,6 @@ function_direct_declarator
     ;
 overload_operator
     : PLUS | MINUS | STAR | SLASH | PERCENT | ASSIGN | EQ | LT | GT | LEFT_BRACKET RIGHT_BRACKET | LEFT_PAREN RIGHT_PAREN
-    ;
-constant_expression_opt
-    : /* empty */ | constant_expression
     ;
 parameter_list_opt
     : /* empty */ | parameter_list
@@ -520,6 +551,13 @@ qualified_name
     ;
 named_identifier
     : IDENTIFIER { $$ = $1; }
+    ;
+/* Once a class/struct tag is registered, a later tag declaration scans as
+   TYPE_NAME. Redeclaring that tag may be semantically ill-formed, but it is
+   not a parser error in this syntax-only project. */
+tag_identifier
+    : IDENTIFIER { $$ = $1; }
+    | TYPE_NAME { $$ = $1; }
     ;
 
 %%

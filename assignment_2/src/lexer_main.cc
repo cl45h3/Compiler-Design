@@ -6,6 +6,7 @@
 /* The parser executable defines this global. The lexer-only executable still
  * uses scanner actions that populate it, so it owns the standalone instance. */
 YYSTYPE yylval;
+YYLTYPE yylloc;
 
 /* The parser provides this diagnostic sink. Lexer-only mode intentionally
  * reports lexical diagnostics only, just as Assignment 1 did. */
