@@ -1,0 +1,3 @@
+ERROR: Invalid identifier (cannot start with a digit) at line 4, column 5
+Syntax Error at line 5, column 13: syntax error, unexpected ';'
+Summary: 1 lexical error(s), 1 syntax error(s).

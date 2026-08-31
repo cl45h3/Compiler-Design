@@ -1,0 +1,67 @@
+=================================================================
+                    SYNTAX ANALYSIS TOKEN TABLE
+=================================================================
+Token                Token_Type
+-----------------------------------------------------------------
+struct               KEYWORD
+Point                IDENTIFIER
+{                    LEFT_BRACE
+int                  KEYWORD
+x                    IDENTIFIER
+;                    SEMICOLON
+int                  KEYWORD
+y                    IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+;                    SEMICOLON
+struct               KEYWORD
+Rectangle            IDENTIFIER
+{                    LEFT_BRACE
+struct               KEYWORD
+Point                IDENTIFIER
+topLeft              IDENTIFIER
+;                    SEMICOLON
+struct               KEYWORD
+Point                IDENTIFIER
+bottomRight          IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+;                    SEMICOLON
+typedef              KEYWORD
+struct               KEYWORD
+{                    LEFT_BRACE
+int                  KEYWORD
+width                IDENTIFIER
+;                    SEMICOLON
+int                  KEYWORD
+height               IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+Size                 IDENTIFIER
+;                    SEMICOLON
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+struct               KEYWORD
+Point                IDENTIFIER
+p                    IDENTIFIER
+;                    SEMICOLON
+Size                 IDENTIFIER
+size                 IDENTIFIER
+;                    SEMICOLON
+p                    IDENTIFIER
+.                    DOT
+x                    IDENTIFIER
+=                    OPERATOR
+size                 IDENTIFIER
+.                    DOT
+width                IDENTIFIER
+;                    SEMICOLON
+return               KEYWORD
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 60

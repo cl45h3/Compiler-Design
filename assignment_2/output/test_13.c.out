@@ -1,0 +1,4 @@
+ERROR: Unterminated string literal at line 4, column 12
+Syntax Error at line 3, column 14: expected ';' after declaration
+Syntax Error at line 5, column 9: syntax error, unexpected ';'
+Summary: 1 lexical error(s), 2 syntax error(s).

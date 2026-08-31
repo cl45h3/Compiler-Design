@@ -1,0 +1,59 @@
+=================================================================
+                    SYNTAX ANALYSIS TOKEN TABLE
+=================================================================
+Token                Token_Type
+-----------------------------------------------------------------
+class                KEYWORD
+Counter              IDENTIFIER
+{                    LEFT_BRACE
+public               KEYWORD
+:                    COLON
+int                  KEYWORD
+value                IDENTIFIER
+;                    SEMICOLON
+Counter              IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+value                IDENTIFIER
+=                    OPERATOR
+0                    INTEGER_LITERAL
+;                    SEMICOLON
+}                    RIGHT_BRACE
+void                 KEYWORD
+set                  IDENTIFIER
+(                    LEFT_PAREN
+int                  KEYWORD
+next                 IDENTIFIER
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+value                IDENTIFIER
+=                    OPERATOR
+next                 IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+}                    RIGHT_BRACE
+;                    SEMICOLON
+int                  KEYWORD
+main                 IDENTIFIER
+(                    LEFT_PAREN
+)                    RIGHT_PAREN
+{                    LEFT_BRACE
+Counter              IDENTIFIER
+counter              IDENTIFIER
+;                    SEMICOLON
+counter              IDENTIFIER
+.                    DOT
+set                  IDENTIFIER
+(                    LEFT_PAREN
+2                    INTEGER_LITERAL
+)                    RIGHT_PAREN
+;                    SEMICOLON
+return               KEYWORD
+counter              IDENTIFIER
+.                    DOT
+value                IDENTIFIER
+;                    SEMICOLON
+}                    RIGHT_BRACE
+-----------------------------------------------------------------
+Total tokens found: 52
