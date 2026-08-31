@@ -10,6 +10,12 @@ analysis, type checking, symbol resolution across scopes, code generation, or
 preprocessing. For example, `10 += 20;` is syntactically valid even though a
 real compiler would reject it later because the left side is not assignable.
 
+## Group Contributors
+- Vaibhav Kumar — Enrolment No. 24114103
+- Samarth Maheshwari — Enrolment No. 24114084
+- Rishabh Gupta — Enrolment No. 24114077
+- Vishal Kumar Shaw — Enrolment No. 24114105
+
 ## Build and run
 
 Required tools: `flex`, `bison`, `g++` with C++17 support, and `make`.
